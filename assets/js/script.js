@@ -20,7 +20,19 @@ let houseChartInstance = null;
 let growthChartInstance = null;
 let mortalityChartInstance = null;
 let layingChartInstance = null;
+let housesData = [];
+let userHouseAssignments = [];
 const EGGS_PER_CRATE = 30;
+
+function getAssignedHouses() {
+    if (currentUser && currentUser.role === 'farm_manager') {
+        const assignedHouseIds = userHouseAssignments
+            .filter(a => a.employee_id == currentUser.id)
+            .map(a => a.house_id);
+        return housesData.filter(h => assignedHouseIds.includes(h.id));
+    }
+    return housesData;
+}
 
 // Demo Data Initialization
 async function initializeDemoData() {
@@ -37,6 +49,23 @@ async function initializeDemoData() {
         growthData = data.growthData || [];
         mortalityData = data.mortalityData || [];
         purchases = data.purchases || [];
+        housesData = data.houses || [];
+        userHouseAssignments = data.user_house_assignments || [];
+        if (!currentUser && data.currentUser) {
+            currentUser = data.currentUser;
+        }
+
+        // Apply filtering for Farm Managers
+        if (currentUser && currentUser.role === 'farm_manager') {
+            const assignedHouseIds = userHouseAssignments
+                .filter(a => a.employee_id == currentUser.id)
+                .map(a => a.house_id);
+
+            housesData = housesData.filter(h => assignedHouseIds.includes(h.id));
+            productionData = productionData.filter(p => assignedHouseIds.includes(p.house_id));
+            growthData = growthData.filter(g => assignedHouseIds.includes(g.houseId));
+            mortalityData = mortalityData.filter(m => assignedHouseIds.includes(m.houseId));
+        }
     } catch (e) {
         console.error("Backend data fetch failed", e);
         showAlert("Cannot connect to database. Please check your PHP server.", "error");
@@ -139,7 +168,7 @@ function logout() {
 // Global Auth Fetch Wrapper
 async function fetchWithAuth(url, options = {}) {
     let accessToken = localStorage.getItem('access_token');
-    
+
     if (!options.headers) options.headers = {};
     if (accessToken) {
         options.headers['Authorization'] = `Bearer ${accessToken}`;
@@ -160,12 +189,12 @@ async function fetchWithAuth(url, options = {}) {
             if (refreshData.success) {
                 localStorage.setItem('access_token', refreshData.access_token);
                 options.headers['Authorization'] = `Bearer ${refreshData.access_token}`;
-                response = await fetch(url, options); // Retry original request
+                response = await fetch(url, options);
             } else {
-                logout(); // Refresh failed
+                logout();
             }
         } else {
-            logout(); // No refresh token
+            logout();
         }
     }
     return response;
@@ -242,15 +271,10 @@ function showRecentCollections() {
     const table = document.getElementById('recentProductionTable');
     if (table) {
         table.innerHTML = '';
-
-        console.log(productionData);
-
-
         productionData.reverse().slice(0, 5).forEach(p => {
             const row = document.createElement('tr');
             row.className = 'bg-white border-b hover:bg-gray-50';
             const employee = employees.find(e => e.id === p.employee_id);
-
             row.innerHTML = `
                 <td class="px-4 py-3">${p.date}</td>
                 <td class="px-4 py-3">${p.house_id}</td>
@@ -311,8 +335,6 @@ function showHouseDetail(houseId) {
     const table = document.getElementById('houseProductionTable');
     if (table) {
         table.innerHTML = '';
-        // console.log(houseProduction);
-
         houseProduction.slice().reverse().forEach(p => {
             const row = document.createElement('tr');
             row.className = 'bg-white border-b hover:bg-gray-50';
@@ -650,23 +672,22 @@ function openIngredientUsageModal() {
     openModal('ingredientUsageModal');
 }
 
+
 // Rearing Page
 function loadRearingPage() {
     const grid = document.getElementById('houseUnitsGrid');
     if (!grid) return;
 
     grid.innerHTML = '';
-    const houseUnits = ['house1a', 'house1b', 'house1c', 'house2a', 'house2b', 'house2c'];
+    const housesToDisplay = getAssignedHouses();
+    const houseUnits = housesToDisplay.map(h => h.id);
 
     houseUnits.forEach(house => {
-
-        const houseData = productionData.filter(p => p.houseId === house);
+        const houseData = productionData.filter(p => p.house_id === house);
         const latestData = houseData[houseData.length - 1];
-
         const div = document.createElement('div');
         div.className = 'bg-white p-4 rounded-xl shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition';
         div.onclick = () => showHouseDetail(house);
-
         div.innerHTML = `
             <div class="flex justify-between items-start mb-3">
                 <h3 class="font-bold text-lg text-gray-900">${house.toUpperCase()}</h3>
@@ -677,7 +698,7 @@ function loadRearingPage() {
             <div class="space-y-2">
                 <div class="flex justify-between text-sm">
                     <span class="text-gray-600">Latest Production:</span>
-                    <span class="font-semibold">${latestData ? latestData.totalEggs + ' eggs' : 'N/A'}</span>
+                    <span class="font-semibold">${latestData ? latestData.total_eggs + ' eggs' : 'N/A'}</span>
                 </div>
                 <div class="flex justify-between text-sm">
                     <span class="text-gray-600">Crates:</span>
@@ -688,16 +709,6 @@ function loadRearingPage() {
         grid.appendChild(div);
     });
 }
-
-
-
-
-
-
-
-
-
-
 
 
 function showHouseDetail(houseId) {
@@ -768,17 +779,6 @@ function showHouseDetail(houseId) {
     section.scrollIntoView({ behavior: 'smooth' });
     if (typeof lucide !== 'undefined') lucide.createIcons();
 }
-
-
-
-
-
-
-
-
-
-
-
 
 function closeHouseDetail() {
     const section = document.getElementById('houseDetailSection');
@@ -958,9 +958,9 @@ function openGrowthModal() {
     const houseSelect = document.getElementById('growthHouseSelect');
     if (houseSelect) {
         houseSelect.innerHTML = '<option value="">Select House Unit</option>';
-        const houseUnits = ['house1a', 'house1b', 'house1c', 'house2a', 'house2b', 'house2c'];
-        houseUnits.forEach(h => {
-            houseSelect.innerHTML += `<option value="${h}">${h.toUpperCase()}</option>`;
+        const houses = getAssignedHouses();
+        houses.forEach(h => {
+            houseSelect.innerHTML += `<option value="${h.id}">${h.name.toUpperCase()}</option>`;
         });
     }
     openModal('growthModal');
@@ -973,9 +973,9 @@ function openMortalityModal() {
     const houseSelect = document.getElementById('mortalityHouseSelect');
     if (houseSelect) {
         houseSelect.innerHTML = '<option value="">Select House Unit</option>';
-        const houseUnits = ['house1a', 'house1b', 'house1c', 'house2a', 'house2b', 'house2c'];
-        houseUnits.forEach(h => {
-            houseSelect.innerHTML += `<option value="${h}">${h.toUpperCase()}</option>`;
+        const houses = getAssignedHouses();
+        houses.forEach(h => {
+            houseSelect.innerHTML += `<option value="${h.id}">${h.name.toUpperCase()}</option>`;
         });
     }
     openModal('mortalityModal');
@@ -988,9 +988,9 @@ function openProductionModal() {
     const houseSelect = document.getElementById('productionHouseSelect');
     if (houseSelect) {
         houseSelect.innerHTML = '<option value="">Select House Unit</option>';
-        const houseUnits = ['house1a', 'house1b', 'house1c', 'house2a', 'house2b', 'house2c'];
-        houseUnits.forEach(h => {
-            houseSelect.innerHTML += `<option value="${h}">${h.toUpperCase()}</option>`;
+        const houses = getAssignedHouses();
+        houses.forEach(h => {
+            houseSelect.innerHTML += `<option value="${h.id}">${h.name.toUpperCase()}</option>`;
         });
     }
     openModal('productionModal');
@@ -1169,7 +1169,6 @@ function loadCRM() {
                 }
                 </td>
             `;
-
             ordersBody.appendChild(row);
         });
     }
@@ -1412,13 +1411,27 @@ function loadAdmin() {
     if (tbody) {
         tbody.innerHTML = '';
         employees.forEach(emp => {
+            const assignedHouses = userHouseAssignments.filter(a => a.employee_id == emp.id);
+
+            let accessLabel;
+
+            if (emp.role === 'admin') {
+                accessLabel = 'Full Access';
+            } else if (emp.role === 'supervisor') {
+                accessLabel = 'All Houses - Read Only';
+            } else if (emp.role === 'sales_manager') {
+                accessLabel = 'Sales & Purchases Only';
+            } else {
+                accessLabel = assignedHouses.length;
+            }
+
             const row = document.createElement('tr');
             row.className = 'bg-white border-b hover:bg-gray-50';
             row.innerHTML = `
                 <td class="px-6 py-4 font-medium">${emp.name}</td>
                 <td class="px-6 py-4 capitalize">${emp.role}</td>
-                <td class="px-6 py-4">${emp.accessLevel}</td>
-                <td class="px-6 py-4 text-sm">${emp.lastLogin}</td>
+                <td class="px-6 py-4">${accessLabel}</td>
+                <td class="px-6 py-4 text-sm">${emp.last_login}</td>
                 <td class="px-6 py-4">
                     <span class="px-2 py-1 rounded-full text-xs ${emp.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
                         ${emp.status}
@@ -1432,8 +1445,37 @@ function loadAdmin() {
             `;
             tbody.appendChild(row);
         });
-        if (typeof lucide !== 'undefined') lucide.createIcons();
     }
+
+
+    // House Assignment
+    const houseAssignBody = document.getElementById('houseAssignTableBody');
+    houseAssignBody.innerHTML = '';
+    const farmManagers = employees.filter(emp => emp.role === 'farm_manager');
+    farmManagers.forEach(emp => {
+        const assignments = userHouseAssignments.filter(a => a.employee_id == emp.id);
+        const houseNames = assignments.map(a => {
+            const h = housesData.find(house => house.id === a.house_id);
+            return h ? h.name : a.house_id;
+        }).join(', ');
+
+        let houseBadges = assignments.length > 0 ?
+            `<span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">${houseNames}</span>` :
+            `<span class="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded">No Houses</span>`;
+
+        const row = document.createElement('tr');
+        row.className = 'bg-white border-b hover:bg-gray-50';
+        row.innerHTML = `
+        <td class="px-6 py-4 font-medium">${emp.name}</td>
+        <td class="px-6 py-4 font-medium">${houseBadges}</td>
+        <td class="px-6 py-4">
+            <button onclick="openReassignHouseModal(${emp.id})" class="text-gray-600 hover:text-gray-800">
+                <i data-lucide="home" class="w-4 h-4"></i>
+            </button>
+        </td>
+    `;
+        houseAssignBody.appendChild(row);
+    });
 }
 
 function openEmployeeModal() {
@@ -1441,7 +1483,8 @@ function openEmployeeModal() {
 }
 
 function toggleEmployeeStatus(id) {
-    const emp = employees.find(e => e.id === id);
+    const emp = employees.find(e => e.id === String(id));
+
     if (emp) {
         emp.status = emp.status === 'active' ? 'inactive' : 'active';
         loadAdmin();
@@ -2008,6 +2051,72 @@ function initFormHandlers() {
     }
 }
 
+
+function openReassignHouseModal(empId) {
+    const employee = employees.find(e => e.id == empId);
+    if (!employee) return;
+
+    document.getElementById('reassignEmployeeId').value = empId;
+    document.getElementById('reassignEmployeeName').textContent = employee.name;
+
+    const container = document.getElementById('reassignHouseCheckboxes');
+    container.innerHTML = '';
+
+    const currentAssignments = userHouseAssignments.filter(a => a.employee_id == empId).map(a => a.house_id);
+
+    housesData.forEach(h => {
+        const isChecked = currentAssignments.includes(h.id) ? 'checked' : '';
+        const label = document.createElement('label');
+        label.className = 'flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200';
+        label.innerHTML = `
+            <input type="checkbox" name="assign_houses[]" value="${h.id}" class="rounded text-green-600 w-4 h-4" ${isChecked}>
+            <span class="text-sm font-medium text-gray-800">${h.name}</span>
+        `;
+        container.appendChild(label);
+    });
+
+    openModal('reassignHouseModal');
+}
+
+
+// Reassign Logic init
+document.addEventListener('DOMContentLoaded', () => {
+    const rform = document.getElementById('reassignHouseForm');
+    if (rform) {
+        rform.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const employee_id = formData.get('employee_id');
+            const selectedHouses = formData.getAll('assign_houses[]');
+
+            try {
+                const response = await fetchWithAuth('./api/user_house_assignments.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ employee_id, houses: selectedHouses })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showAlert('Houses assigned successfully', 'success');
+                    closeModal('reassignHouseModal');
+                    await initializeDemoData();
+                    if (currentPage === 'admin') loadAdmin();
+                    location.reload();
+                } else {
+                    showAlert('Error: ' + result.error, 'error');
+                }
+            } catch (err) {
+                showAlert('Failed to connect to server', 'error');
+            }
+        });
+    }
+});
+
+
+
+
+
 // Initialize
 document.addEventListener('DOMContentLoaded', async function () {
     const page = window.location.pathname.split('/').pop().replace('.php', '') || 'dashboard';
@@ -2050,7 +2159,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const togglePassword = document.getElementById('togglePassword');
     const passwordInput = document.getElementById('password');
     if (togglePassword && passwordInput) {
-        togglePassword.addEventListener('click', function() {
+        togglePassword.addEventListener('click', function () {
             const isPass = passwordInput.type === 'password';
             passwordInput.type = isPass ? 'text' : 'password';
             this.innerHTML = `<i data-lucide="${isPass ? 'eye-off' : 'eye'}" class="w-5 h-5"></i>`;

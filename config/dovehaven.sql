@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 02, 2026 at 09:44 PM
+-- Generation Time: Apr 06, 2026 at 06:42 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -48,7 +48,8 @@ INSERT INTO `customers` (`id`, `name`, `email`, `phone`, `address`, `balance`, `
 (4, 'gfhf', '394-2018@hamdard.edu', '3000000000', 'sfhh', 0.00, 0),
 (5, '.htaccess', '394-2018@hamdard.edu', '3000000000', 'ssssss', 104.98, 1),
 (6, 'ssssss', 'sssssssss@gmail.com', '3000000000', 'ssssssssss', 94.99, 1),
-(7, 'Dilsher', 'dilsher@codeanddesigngroup.com', '3000000000', 'ssssssss', 0.00, 0);
+(7, 'Dilsher', 'dilsher@codeanddesigngroup.com', '3000000000', 'ssssssss', 0.00, 0),
+(8, 'f', 'fffffff@gmail.com', '3000000000', 'ffffffff', 0.00, 0);
 
 -- --------------------------------------------------------
 
@@ -74,11 +75,11 @@ CREATE TABLE `employees` (
 --
 
 INSERT INTO `employees` (`id`, `name`, `username`, `password`, `role`, `email`, `status`, `last_login`, `failed_attempts`, `lock_until`) VALUES
-(1, 'Administrator', 'admin', 'admin123', 'admin', 'admin@dovehaven.com', 'active', NULL, 0, NULL),
-(2, 'Farm Manager 1', 'manager1', 'manager123', 'farm_manager', 'manager1@dovehaven.com', 'active', NULL, 1, NULL),
-(3, 'Farm Manager 2', 'manager2', 'manager123', 'farm_manager', 'manager2@dovehaven.com', 'active', NULL, 0, NULL),
-(4, 'Supervisor', 'supervisor', 'super123', 'supervisor', 'supervisor@dovehaven.com', 'active', NULL, 0, NULL),
-(5, 'Sales Manager', 'sales', 'sales123', 'sales_manager', 'sales@dovehaven.com', 'active', NULL, 0, NULL);
+(1, 'Administrator', 'admin', '$2y$12$WsICFROoteOg/BiaNvb1MOqKVlveD6rLqjp.R6tr3Qr1dIComOdbS', 'admin', 'admin@dovehaven.com', 'active', '2026-04-06 21:38:10', 0, NULL),
+(2, 'Farm Manager 1', 'manager1', '$2y$12$GhOtqLjRwI2XXL5sePoL/uf15XUKFteuvKLXSMRA3mmaqcISC9WtO', 'farm_manager', 'manager1@dovehaven.com', 'active', '2026-04-06 21:22:17', 0, NULL),
+(3, 'Farm Manager 2', 'manager2', '$2y$12$Wm.qIxbkn84arCFyQzsp4uTqaZFNnzKCjyJKrV0N/UFBPNw3MGyIy', 'farm_manager', 'manager2@dovehaven.com', 'active', '2026-04-06 20:31:50', 0, NULL),
+(4, 'Supervisor', 'supervisor', '$2y$12$DsvCAtcvf3ulUJs7W.tcv.B/TrRgIad4sl3WU/AAke.xSB5uBV.AK', 'supervisor', 'supervisor@dovehaven.com', 'active', '2026-04-03 23:53:37', 0, NULL),
+(5, 'Sales Manager', 'sales', '$2y$12$azk20ztho7uxVoirPv1WCu/iieH/3bA7CFc95i9.Df4cL4ql/uSWy', 'sales_manager', 'sales@dovehaven.com', 'active', '2026-04-03 19:49:24', 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -112,6 +113,30 @@ INSERT INTO `growth` (`id`, `date`, `house_id`, `flock_id`, `avg_weight`, `bird_
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `houses`
+--
+
+CREATE TABLE `houses` (
+  `id` varchar(50) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `status` varchar(20) DEFAULT 'active'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `houses`
+--
+
+INSERT INTO `houses` (`id`, `name`, `status`) VALUES
+('house1a', 'House 1A', 'active'),
+('house1b', 'House 1B', 'active'),
+('house1c', 'House 1C', 'active'),
+('house2a', 'House 2A', 'active'),
+('house2b', 'House 2B', 'active'),
+('house2c', 'House 2C', 'active');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `inventory`
 --
 
@@ -130,7 +155,7 @@ CREATE TABLE `inventory` (
 --
 
 INSERT INTO `inventory` (`id`, `name`, `quantity`, `purchased`, `used`, `supplier`, `cost`) VALUES
-('corn', 'Corn/Maize', 2489.00, 5015.00, 2521.00, 'GrainCo Ltd', 0.35),
+('corn', 'Corn/Maize', 2502.00, 5028.00, 2521.00, 'GrainCo Ltd', 0.35),
 ('soybean', 'Soybean Meal', 1800.00, 3000.00, 1200.00, 'ProteinFeeds Inc', 0.45);
 
 -- --------------------------------------------------------
@@ -166,7 +191,11 @@ INSERT INTO `inventory_transactions` (`id`, `date`, `ingredient`, `type`, `quant
 (9, '2026-04-01', 'corn', 'usage', 5.00, 'ggggg', 'gg', '2026-04-01 19:05:13'),
 (10, '2026-04-02', 'corn', 'usage', 10.00, 'dgd', 'dgsdg', '2026-04-02 13:09:51'),
 (11, '2026-04-02', 'corn', 'purchase', 5.00, '', 'Purchased from Uzair', '2026-04-02 18:29:20'),
-(12, '2026-04-02', 'corn', 'usage', 1.00, 'fhgdg', 'dsfgdg', '2026-04-02 18:29:45');
+(12, '2026-04-02', 'corn', 'usage', 1.00, 'fhgdg', 'dsfgdg', '2026-04-02 18:29:45'),
+(13, '2026-04-03', 'corn', 'purchase', 6.00, '', 'Purchased from ddddd', '2026-04-02 19:55:41'),
+(14, '2026-04-03', 'corn', 'purchase', 5.00, '', 'Purchased from Uzair', '2026-04-03 12:50:19'),
+(15, '2026-04-03', 'corn', 'purchase', 1.00, '', 'Purchased from John', '2026-04-03 14:08:54'),
+(16, '2026-04-03', 'corn', 'purchase', 1.00, '', 'Purchased from John', '2026-04-03 15:31:28');
 
 -- --------------------------------------------------------
 
@@ -322,24 +351,49 @@ CREATE TABLE `refresh_tokens` (
 --
 
 INSERT INTO `refresh_tokens` (`id`, `user_id`, `token`, `expires_at`, `created_at`) VALUES
-(1, 1, '6c89e3b91dc95bfff751897901d0e5e53502bb70f31013c3b94d84dca2ba5aae', '2026-04-09 16:29:59', '2026-04-02 19:29:59'),
-(2, 1, '3d87a5a090947749f751e39e5ce719f431b7e733c0682846a37c41add68abf45', '2026-04-09 16:30:52', '2026-04-02 19:30:52'),
-(3, 1, 'a8bb9c86fbedf71a2dd5c20893a88ff357679f77d52f865e70fcae57a11cc643', '2026-04-09 17:04:22', '2026-04-02 20:04:22'),
-(5, 1, 'b3c774f354d5fd1558458bf14f98ebdbd72e61e1ceef61fd90ef400933f221c8', '2026-04-09 17:09:49', '2026-04-02 20:09:49'),
-(6, 1, '770a4c23898f48d9d16c2079e45c38373d37f702cd8396657f709bc6de8583f0', '2026-04-09 17:10:37', '2026-04-02 20:10:37'),
-(7, 1, 'ea20818f6033dc8f8b30fd78d3a617e5aa5fb969556f626cd0ef99cfb8c82938', '2026-04-09 17:21:03', '2026-04-02 20:21:03'),
-(8, 1, 'ecfca17529cceeffdd672bb7ef470bb092c795bd487c347f80e9e669723e54c7', '2026-04-09 17:22:47', '2026-04-02 20:22:47'),
-(9, 1, '94b13f60273b03b9f25169880bb5073a9fdc30d2571f5f4303d43b83f4ea7fe1', '2026-04-09 17:23:10', '2026-04-02 20:23:10'),
-(11, 1, '574f6103375bc006e120830010d7174e1503122a4dd42398da08c424f20ba69c', '2026-04-09 17:44:25', '2026-04-02 20:44:25'),
-(13, 1, '651ee84ecba06f77804ed44a2ddeddb1674225a7696fae62998701646b310697', '2026-04-09 18:02:05', '2026-04-02 21:02:05'),
-(18, 1, '1eb09268635266a4d263608eaff2c7dfc510600d62f0a989a945bda6edc25724', '2026-04-09 18:27:17', '2026-04-02 21:27:17'),
-(21, 1, '645d39306c5c95a823fe7c62688d26b19242b96bcaa29e41254f1826b8197cde', '2026-04-09 18:45:18', '2026-04-02 21:45:18'),
-(23, 1, '4a26b0d8198a07da606cc950f2de220cf0b1c41326a8c53a468d194dde3edc4d', '2026-04-09 20:07:57', '2026-04-02 23:07:57'),
-(24, 1, '00d877d2b970a4702e7926e991baa24268c6622cbc20ee5e6f01c4413a775234', '2026-04-09 20:10:08', '2026-04-02 23:10:08'),
-(25, 1, '21a1dfc610fd2569ac8d1e6fe1dedce8c8c38621340db3486cf6d64776136a94', '2026-04-09 20:11:58', '2026-04-02 23:11:58'),
-(26, 1, '695c0a26c836b4cb8c8c028d31cb4a58afa90b630f8344c75fa8bf7755eeb07a', '2026-04-09 20:20:35', '2026-04-02 23:20:35'),
-(27, 1, 'b4886ab8cc8c8cbb888ab3db5466db15c5577e64adff12e0ac02b6af2121f12e', '2026-04-09 20:20:50', '2026-04-02 23:20:50'),
-(28, 1, 'f87cd4719446fb788c2f9a601aedf297050b516f893c4e970e1482182828f26e', '2026-04-09 20:55:02', '2026-04-02 23:55:02');
+(2, 1, '5b4450abafa2302982a01bdc84475861caacfb879a26c70fdb594041398e2cb2', '2026-04-10 14:47:01', '2026-04-03 17:47:01'),
+(3, 1, 'b5600311ba489ff44f9acb83a806beb13c59749e5e5e19ea520dd68a1277aa00', '2026-04-10 15:03:20', '2026-04-03 18:03:20'),
+(4, 1, 'b3dc8fa90e9626b6907fe89e9fc2312f78a47e9c2e6a128d3912613ad4460287', '2026-04-10 15:39:45', '2026-04-03 18:39:45'),
+(9, 4, 'd9c2377c2be0b417f929f9e3b7eca4a75a423b583d13be22a4396b3b319a91e6', '2026-04-10 16:25:07', '2026-04-03 19:25:07'),
+(18, 1, '220926c7c612388f1a4869ad34ab28aafbf04ea4145f0c8a17ef54a9c4047f42', '2026-04-10 19:23:08', '2026-04-03 22:23:08'),
+(19, 1, '12e9a4e553f559026d9d09d362786408ec7cba8d87d906c182163c46a43e908c', '2026-04-10 20:08:02', '2026-04-03 23:08:02'),
+(24, 1, '637c902575d4f688dcb3872e85ed75622cabe234584e8f2a20fc9674eff14ce7', '2026-04-13 14:24:51', '2026-04-06 17:24:51'),
+(27, 1, '9ee40211830c8bbe70ececf350f0997f1bbf86c7b228679c0ccf0ee346c21a0c', '2026-04-13 14:50:49', '2026-04-06 17:50:49'),
+(28, 1, '306a896f01bd5cf9b7018dfe7d72afb566ea9ccb03ef41ea44303d25f7db6d19', '2026-04-13 15:08:03', '2026-04-06 18:08:03'),
+(29, 1, 'ced3ff90beaeeaa147b4dcb2e3dde070b0a3e320d071bbedc4f861675548be27', '2026-04-13 15:24:18', '2026-04-06 18:24:18'),
+(30, 1, 'ad1ff76fa6297d97ccb6448b8d79ed1e2c7eec8379aeccf2460606e9bcab7a7f', '2026-04-13 15:40:33', '2026-04-06 18:40:33'),
+(31, 1, 'b97e9470b8a72155564298440bc20c6221926c68521620a8d60a02fc36daf043', '2026-04-13 16:00:10', '2026-04-06 19:00:10'),
+(32, 1, '6e12ee0ccf24c5763720c3c3983bd3417ddca353a38090df3c6e365755b95c13', '2026-04-13 16:18:04', '2026-04-06 19:18:04'),
+(33, 1, 'ea31923af15d3d2fd50ca3025898ae685a77d8ebaed491534c44ccc565bcf5ba', '2026-04-13 16:33:32', '2026-04-06 19:33:32'),
+(34, 1, '9d948f3f6d5e79ef024807bc3ce9d92b164006c6a6f4b595b4be6e75eebb1a4c', '2026-04-13 16:49:19', '2026-04-06 19:49:19'),
+(35, 1, 'eb448f9e21b92d1058d217cc8079daa31d02742e774b6c39c6550c1ba31218c4', '2026-04-13 17:05:12', '2026-04-06 20:05:12'),
+(38, 1, '01a610a94f5eceecb31c9e6c51b873e7996b1d7a863dc353f772c8e483b1cff4', '2026-04-13 17:36:25', '2026-04-06 20:36:25'),
+(39, 1, '0c82a4d4e19089395f66f63ba8876532ad087c6ed5882ecd80091adf92318af5', '2026-04-13 17:53:13', '2026-04-06 20:53:13'),
+(41, 2, 'c34d7b7a1c319087a59b5a81159315613763aeac482426931312fb3943052f3d', '2026-04-13 18:22:17', '2026-04-06 21:22:17'),
+(42, 1, '4171f0948fb815f43b6f9e4448a6acde6bc6b3555c2f4d209442f73b7e703943', '2026-04-13 18:38:10', '2026-04-06 21:38:10');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_house_assignments`
+--
+
+CREATE TABLE `user_house_assignments` (
+  `id` int(11) NOT NULL,
+  `employee_id` int(11) NOT NULL,
+  `house_id` varchar(50) NOT NULL,
+  `assigned_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `user_house_assignments`
+--
+
+INSERT INTO `user_house_assignments` (`id`, `employee_id`, `house_id`, `assigned_at`) VALUES
+(6, 2, 'house1a', '2026-04-06 20:06:48'),
+(7, 2, 'house1b', '2026-04-06 20:06:48'),
+(9, 3, 'house2a', '2026-04-06 20:30:27'),
+(10, 3, 'house2c', '2026-04-06 20:30:27');
 
 --
 -- Indexes for dumped tables
@@ -362,6 +416,12 @@ ALTER TABLE `employees`
 -- Indexes for table `growth`
 --
 ALTER TABLE `growth`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `houses`
+--
+ALTER TABLE `houses`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -418,6 +478,14 @@ ALTER TABLE `refresh_tokens`
   ADD UNIQUE KEY `token` (`token`);
 
 --
+-- Indexes for table `user_house_assignments`
+--
+ALTER TABLE `user_house_assignments`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `employee_id` (`employee_id`,`house_id`),
+  ADD KEY `user_house_assignments_ibfk_2` (`house_id`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -425,7 +493,7 @@ ALTER TABLE `refresh_tokens`
 -- AUTO_INCREMENT for table `customers`
 --
 ALTER TABLE `customers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `employees`
@@ -443,7 +511,7 @@ ALTER TABLE `growth`
 -- AUTO_INCREMENT for table `inventory_transactions`
 --
 ALTER TABLE `inventory_transactions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `mortality`
@@ -473,7 +541,13 @@ ALTER TABLE `purchases`
 -- AUTO_INCREMENT for table `refresh_tokens`
 --
 ALTER TABLE `refresh_tokens`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+
+--
+-- AUTO_INCREMENT for table `user_house_assignments`
+--
+ALTER TABLE `user_house_assignments`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- Constraints for dumped tables
@@ -502,6 +576,13 @@ ALTER TABLE `payments`
 --
 ALTER TABLE `production`
   ADD CONSTRAINT `production_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`);
+
+--
+-- Constraints for table `user_house_assignments`
+--
+ALTER TABLE `user_house_assignments`
+  ADD CONSTRAINT `user_house_assignments_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `user_house_assignments_ibfk_2` FOREIGN KEY (`house_id`) REFERENCES `houses` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

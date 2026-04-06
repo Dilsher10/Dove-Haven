@@ -30,6 +30,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $response['mortalityData'] = $conn->query("SELECT * FROM mortality")->fetch_all(MYSQLI_ASSOC);
         $response['inventoryTransactions'] = $conn->query("SELECT id, date, ingredient, type, quantity, purpose, notes FROM inventory_transactions")->fetch_all(MYSQLI_ASSOC);
         $response['payments'] = $conn->query("SELECT * FROM payments")->fetch_all(MYSQLI_ASSOC);
+        $response['houses'] = $conn->query("SELECT * FROM houses")->fetch_all(MYSQLI_ASSOC);
+        $response['user_house_assignments'] = $conn->query("SELECT * FROM user_house_assignments")->fetch_all(MYSQLI_ASSOC);
+
+        $user_res = $conn->query("SELECT id, name, role FROM employees WHERE id = $user_id")->fetch_assoc();
+        $response['currentUser'] = $user_res;
         
         echo json_encode($response);
     } catch (\mysqli_sql_exception $e) {

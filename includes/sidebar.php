@@ -78,7 +78,7 @@ function has_access($page, $role) {
         <a href="crates.php"
             class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition text-left <?php echo $current_page == 'crates.php' ? 'bg-gray-800' : ''; ?>"
             data-page="crates">
-            <i data-lucide="containers" class="w-5 h-5"></i>
+            <i data-lucide="container" class="w-5 h-5"></i>
             <span>Crate Inventory</span>
         </a>
         <?php endif; ?>
