@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 06, 2026 at 06:42 PM
+-- Generation Time: Apr 07, 2026 at 06:31 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,6 +20,48 @@ SET time_zone = "+00:00";
 --
 -- Database: `dovehaven`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `crate_inventory`
+--
+
+CREATE TABLE `crate_inventory` (
+  `id` int(11) NOT NULL,
+  `stock` int(11) NOT NULL DEFAULT 0,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `crate_inventory`
+--
+
+INSERT INTO `crate_inventory` (`id`, `stock`, `updated_at`) VALUES
+(1, 145, '2026-04-07 16:02:16');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `crate_movements`
+--
+
+CREATE TABLE `crate_movements` (
+  `id` int(11) NOT NULL,
+  `date` timestamp NOT NULL DEFAULT current_timestamp(),
+  `type` varchar(50) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `reason` varchar(255) DEFAULT NULL,
+  `balance` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `crate_movements`
+--
+
+INSERT INTO `crate_movements` (`id`, `date`, `type`, `quantity`, `reason`, `balance`) VALUES
+(1, '2026-04-07 15:53:57', 'Purchase/Return', 5, 'purchased', 155),
+(2, '2026-04-07 16:02:16', 'Damage/Loss', -10, 'Saled', 145);
 
 -- --------------------------------------------------------
 
@@ -42,8 +84,8 @@ CREATE TABLE `customers` (
 --
 
 INSERT INTO `customers` (`id`, `name`, `email`, `phone`, `address`, `balance`, `total_orders`) VALUES
-(1, 'Green Grocers Ltd', 'orders@greengrocers.com', '+1 234-567-8900', '123 Market St', 1250.00, 15),
-(2, 'Fresh Farms Market', 'buy@freshfarms.com', '+1 234-567-8901', '456 Farm Rd', 450.00, 8),
+(1, 'Green Grocers Ltd', 'orders@greengrocers.com', '+1 234-567-8900', '123 Market St', 3055.00, 21),
+(2, 'Fresh Farms Market', 'buy@freshfarms.com', '+1 234-567-8901', '456 Farm Rd', 2115.00, 13),
 (3, 'ads', 'demo@gmail.com', '3000000000', 'asdfffff', 0.00, 0),
 (4, 'gfhf', '394-2018@hamdard.edu', '3000000000', 'sfhh', 0.00, 0),
 (5, '.htaccess', '394-2018@hamdard.edu', '3000000000', 'ssssss', 104.98, 1),
@@ -75,11 +117,11 @@ CREATE TABLE `employees` (
 --
 
 INSERT INTO `employees` (`id`, `name`, `username`, `password`, `role`, `email`, `status`, `last_login`, `failed_attempts`, `lock_until`) VALUES
-(1, 'Administrator', 'admin', '$2y$12$WsICFROoteOg/BiaNvb1MOqKVlveD6rLqjp.R6tr3Qr1dIComOdbS', 'admin', 'admin@dovehaven.com', 'active', '2026-04-06 21:38:10', 0, NULL),
-(2, 'Farm Manager 1', 'manager1', '$2y$12$GhOtqLjRwI2XXL5sePoL/uf15XUKFteuvKLXSMRA3mmaqcISC9WtO', 'farm_manager', 'manager1@dovehaven.com', 'active', '2026-04-06 21:22:17', 0, NULL),
-(3, 'Farm Manager 2', 'manager2', '$2y$12$Wm.qIxbkn84arCFyQzsp4uTqaZFNnzKCjyJKrV0N/UFBPNw3MGyIy', 'farm_manager', 'manager2@dovehaven.com', 'active', '2026-04-06 20:31:50', 0, NULL),
-(4, 'Supervisor', 'supervisor', '$2y$12$DsvCAtcvf3ulUJs7W.tcv.B/TrRgIad4sl3WU/AAke.xSB5uBV.AK', 'supervisor', 'supervisor@dovehaven.com', 'active', '2026-04-03 23:53:37', 0, NULL),
-(5, 'Sales Manager', 'sales', '$2y$12$azk20ztho7uxVoirPv1WCu/iieH/3bA7CFc95i9.Df4cL4ql/uSWy', 'sales_manager', 'sales@dovehaven.com', 'active', '2026-04-03 19:49:24', 0, NULL);
+(1, 'Administrator', 'admin', '$2y$12$WsICFROoteOg/BiaNvb1MOqKVlveD6rLqjp.R6tr3Qr1dIComOdbS', 'admin', 'admin@dovehaven.com', 'active', '2026-04-07 21:19:59', 0, NULL),
+(2, 'Farm Manager 1', 'manager1', '$2y$12$GhOtqLjRwI2XXL5sePoL/uf15XUKFteuvKLXSMRA3mmaqcISC9WtO', 'farm_manager', 'manager1@dovehaven.com', 'active', '2026-04-06 21:57:58', 0, NULL),
+(3, 'Farm Manager 2', 'manager2', '$2y$12$Wm.qIxbkn84arCFyQzsp4uTqaZFNnzKCjyJKrV0N/UFBPNw3MGyIy', 'farm_manager', 'manager2@dovehaven.com', 'active', '2026-04-06 23:55:33', 0, NULL),
+(4, 'Supervisor', 'supervisor', '$2y$12$DsvCAtcvf3ulUJs7W.tcv.B/TrRgIad4sl3WU/AAke.xSB5uBV.AK', 'supervisor', 'supervisor@dovehaven.com', 'active', '2026-04-07 16:31:00', 0, NULL),
+(5, 'Sales Manager', 'sales', '$2y$12$azk20ztho7uxVoirPv1WCu/iieH/3bA7CFc95i9.Df4cL4ql/uSWy', 'sales_manager', 'sales@dovehaven.com', 'active', '2026-04-06 22:13:19', 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -156,7 +198,21 @@ CREATE TABLE `inventory` (
 
 INSERT INTO `inventory` (`id`, `name`, `quantity`, `purchased`, `used`, `supplier`, `cost`) VALUES
 ('corn', 'Corn/Maize', 2502.00, 5028.00, 2521.00, 'GrainCo Ltd', 0.35),
-('soybean', 'Soybean Meal', 1800.00, 3000.00, 1200.00, 'ProteinFeeds Inc', 0.45);
+('dcp', 'DCP', 200.00, 500.00, 300.00, 'MineralSupply', 0.65),
+('developer', 'Developer Feed', 600.00, 1200.00, 600.00, 'In-House', 0.50),
+('fishmeal', 'Fish Meal', 400.00, 800.00, 400.00, 'SeaFeed Co', 0.85),
+('galdus', 'Galdus Feed', 400.00, 800.00, 400.00, 'Galdus Ltd', 0.70),
+('grower', 'Grower Feed', 800.00, 1500.00, 700.00, 'In-House', 0.55),
+('layer', 'Layer Feed', 3500.00, 6000.00, 2500.00, 'In-House', 0.52),
+('limestone', 'Limestone', 600.00, 1000.00, 400.00, 'MineralSupply', 0.12),
+('lysine', 'Lysine', 50.00, 100.00, 50.00, 'AminoFeed Ltd', 2.50),
+('methionine', 'Methionine', 30.00, 80.00, 50.00, 'AminoFeed Ltd', 3.20),
+('oil', 'Vegetable Oil', 150.00, 300.00, 150.00, 'OilMills Inc', 1.20),
+('premix', 'Vitamin Premix', 80.00, 150.00, 70.00, 'VitaChem', 4.00),
+('salt', 'Salt', 100.00, 200.00, 100.00, 'GrainCo Ltd', 0.08),
+('soybean', 'Soybean Meal', 1800.00, 3000.00, 1200.00, 'ProteinFeeds Inc', 0.45),
+('starter', 'Starter Feed', 500.00, 1000.00, 500.00, 'In-House', 0.60),
+('wheat', 'Wheat', 1200.00, 2000.00, 800.00, 'GrainCo Ltd', 0.32);
 
 -- --------------------------------------------------------
 
@@ -245,9 +301,11 @@ CREATE TABLE `orders` (
 --
 
 INSERT INTO `orders` (`id`, `customer_id`, `date`, `items`, `quantity`, `product`, `total`, `paid`, `balance`, `payment_method`, `payment_status`) VALUES
-('ORD-001', 1, '2024-01-15', '15 Crates Large', 15, 'eggs_large', 450.00, 200.00, 250.00, 'mixed', 'partial'),
-('ORD-002', 6, '2026-03-31', '1 Crates Large Eggs, 1 Crates Medium Eggs, 1 Crates Small Eggs, 1 x Large Eggs (Tray)', 3, 'various', 95.00, 0.01, 94.99, 'cash', 'partial'),
-('ORD-003', 5, '2026-03-31', '1 Crates Large Eggs, 1 Crates Medium Eggs, 1 Crates Small Eggs, 1 Crates Extra Small Eggs, 1 x Manure (Bag)', 4, 'various', 105.01, 0.03, 104.98, 'cash', 'partial');
+('ORD-001', 1, '2026-04-07', '110 Crates Large Eggs, 50 Crates Medium Eggs, 30 Crates Small Eggs, 10 Crates Extra Small Eggs, 10 x Large Eggs (Tray)', 200, 'various', 5790.00, 5740.00, 0.00, 'cash', 'paid'),
+('ORD-002', 2, '2026-04-07', '50 Crates Large Eggs, 30 Crates Medium Eggs, 20 Crates Small Eggs, 10 Crates Extra Small Eggs, 10 x Medium Eggs (Tray)', 110, 'various', 3170.00, 2770.00, 400.00, 'cash', 'partial'),
+('ORD-003', 1, '2026-04-07', '10 Crates Large Eggs, 10 Crates Medium Eggs, 10 Crates Small Eggs, 10 Crates Extra Small Eggs, 10 x Large Eggs (Tray)', 40, 'various', 1170.00, 1170.00, 0.00, 'cash', 'paid'),
+('ORD-004', 2, '2026-04-07', '30 Crates Large Eggs, 10 Crates Medium Eggs, 10 Crates Small Eggs, 10 x Small Eggs (Tray)', 50, 'various', 1530.00, 1530.00, 0.00, 'cash', 'paid'),
+('ORD-005', 2, '2026-04-07', '10 Crates Large Eggs, 10 Crates Medium Eggs, 10 Crates Small Eggs, 10 Crates Extra Small Eggs, 10 x Live Bird', 40, 'various', 1200.00, 1200.00, 0.00, 'cash', 'paid');
 
 -- --------------------------------------------------------
 
@@ -263,6 +321,15 @@ CREATE TABLE `payments` (
   `payment_ref` varchar(100) DEFAULT NULL,
   `date` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `payments`
+--
+
+INSERT INTO `payments` (`id`, `order_id`, `amount`, `payment_method`, `payment_ref`, `date`) VALUES
+(1, 'ORD-002', 100.00, 'cash', 'paid', '2026-04-07 20:25:19'),
+(2, 'ORD-003', 20.00, 'cash', 'paid', '2026-04-07 20:25:39'),
+(3, 'ORD-002', 20.00, 'cash', 'paid', '2026-04-07 20:26:09');
 
 -- --------------------------------------------------------
 
@@ -298,7 +365,8 @@ INSERT INTO `production` (`id`, `date`, `house_id`, `crates`, `loose_eggs`, `tot
 (3, '2026-03-31', 'house1a', 0, 5, 5, 1, 1, 1, 1, 1, 0.00, '0', 'sssssssssssssss', 1),
 (4, '2026-03-31', 'house2c', 0, 1, 1, 1, 0, 0, 0, 0, 0.00, '0', 'gggggggg', 1),
 (5, '2026-03-31', 'house2b', 0, 5, 5, 1, 1, 1, 1, 1, 0.00, '0', 'fffffffff', 1),
-(6, '2026-03-31', 'house1c', 0, 17, 17, 10, 4, 2, 1, 0, 0.00, '0', 'dddddddd', 1);
+(6, '2026-03-31', 'house1c', 0, 17, 17, 10, 4, 2, 1, 0, 0.00, '0', 'dddddddd', 1),
+(7, '2026-04-07', 'house1a', 19, 10, 580, 250, 150, 100, 50, 30, 50.00, '0', 'Today\'s', 1);
 
 -- --------------------------------------------------------
 
@@ -315,22 +383,23 @@ CREATE TABLE `purchases` (
   `unit` varchar(20) DEFAULT NULL,
   `unit_cost` decimal(10,2) DEFAULT NULL,
   `total_cost` decimal(10,2) DEFAULT NULL,
-  `supplier` varchar(100) DEFAULT NULL
+  `supplier` varchar(100) DEFAULT NULL,
+  `invoice` varchar(250) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `purchases`
 --
 
-INSERT INTO `purchases` (`id`, `date`, `category`, `item`, `quantity`, `unit`, `unit_cost`, `total_cost`, `supplier`) VALUES
-(1, '2026-03-31', 'feed', 'hhh', 1.00, 'units', 0.01, 0.01, 'dil'),
-(2, '2026-03-31', 'feed', 'hhh', 1.00, 'units', 0.01, 0.01, 'dil'),
-(3, '2026-03-31', 'feed', 'hhh', 1.00, 'units', 0.01, 0.01, 'dil'),
-(4, '2026-03-31', 'Feed Ingredient', 'corn', 0.10, 'kg', 0.01, 0.01, 'f'),
-(5, '2026-03-31', 'feed', 'hhh', 1.00, 'kg', 0.01, 0.01, 'dil'),
-(6, '2026-03-31', 'feed', 'new', 1.00, 'units', 0.01, 0.01, 'dil'),
-(7, '2026-03-31', 'Feed Ingredient', 'wheat', 4.40, 'kg', 0.25, 0.25, 'John'),
-(8, '2026-04-01', 'Feed Ingredient', 'corn', 5.00, 'kg', 1.00, 1.00, 'John');
+INSERT INTO `purchases` (`id`, `date`, `category`, `item`, `quantity`, `unit`, `unit_cost`, `total_cost`, `supplier`, `invoice`) VALUES
+(1, '2026-03-31', 'feed', 'hhh', 1.00, 'units', 0.01, 0.01, 'dil', ''),
+(2, '2026-03-31', 'feed', 'hhh', 1.00, 'units', 0.01, 0.01, 'dil', ''),
+(3, '2026-03-31', 'feed', 'hhh', 1.00, 'units', 0.01, 0.01, 'dil', ''),
+(4, '2026-03-31', 'Feed Ingredient', 'corn', 0.10, 'kg', 0.01, 0.01, 'f', ''),
+(5, '2026-03-31', 'feed', 'hhh', 1.00, 'kg', 0.01, 0.01, 'dil', ''),
+(6, '2026-03-31', 'feed', 'new', 1.00, 'units', 0.01, 0.01, 'dil', ''),
+(7, '2026-03-31', 'Feed Ingredient', 'wheat', 4.40, 'kg', 0.25, 0.25, 'John', ''),
+(8, '2026-04-01', 'Feed Ingredient', 'corn', 5.00, 'kg', 1.00, 1.00, 'John', '');
 
 -- --------------------------------------------------------
 
@@ -370,7 +439,27 @@ INSERT INTO `refresh_tokens` (`id`, `user_id`, `token`, `expires_at`, `created_a
 (38, 1, '01a610a94f5eceecb31c9e6c51b873e7996b1d7a863dc353f772c8e483b1cff4', '2026-04-13 17:36:25', '2026-04-06 20:36:25'),
 (39, 1, '0c82a4d4e19089395f66f63ba8876532ad087c6ed5882ecd80091adf92318af5', '2026-04-13 17:53:13', '2026-04-06 20:53:13'),
 (41, 2, 'c34d7b7a1c319087a59b5a81159315613763aeac482426931312fb3943052f3d', '2026-04-13 18:22:17', '2026-04-06 21:22:17'),
-(42, 1, '4171f0948fb815f43b6f9e4448a6acde6bc6b3555c2f4d209442f73b7e703943', '2026-04-13 18:38:10', '2026-04-06 21:38:10');
+(53, 3, 'd3c6bd7dc9de16a7b2ce6695ab978abf7a22e4b3aef06547a61e32deae24f210', '2026-04-13 19:14:06', '2026-04-06 22:14:06'),
+(54, 1, '5826b92f4c730d76a2b5f59f205e7749600de19885e6a68bf9c8e55564b5f1f0', '2026-04-13 20:00:30', '2026-04-06 23:00:30'),
+(55, 1, 'c2b681db8e90943d0951f649aa65269e95b552a9fd452ea7b6543c50bca03ea3', '2026-04-13 20:31:15', '2026-04-06 23:31:15'),
+(59, 4, '28da11e0cd73c3820768fed89b0bf25a6d6634311fb67e94f12cb2de5cd993f3', '2026-04-14 13:29:20', '2026-04-07 16:29:20'),
+(60, 4, 'da22f87de67d7089efeb8d7f68f11620dc06750a441ad75421a206dbdff82e0e', '2026-04-14 13:29:42', '2026-04-07 16:29:42'),
+(65, 4, 'ef8d1afe7c0df26ca296c17934161538ca1771c18856af9cf649edb6b3b1ce22', '2026-04-14 13:31:00', '2026-04-07 16:31:00'),
+(69, 1, '32ce7ea7c959fde9103f1e907ad53a859fc452a0416927091263b907caea0bff', '2026-04-14 13:43:05', '2026-04-07 16:43:05'),
+(70, 1, '416349517e76f95f4f4745de2e757d7d9bd3b80fbcee320c8600b965940a4db1', '2026-04-14 13:58:30', '2026-04-07 16:58:30'),
+(71, 1, '563825a381f9c7a16a73fac7f52f3fa054980fd530fb66aa497f9178d98bc82b', '2026-04-14 14:17:48', '2026-04-07 17:17:48'),
+(72, 1, '711db06d629d8bdbf460279b91929134612fc5daa0007cbef25cb4e8e344e2ea', '2026-04-14 14:32:57', '2026-04-07 17:32:57'),
+(73, 1, '42533daf44c9d9afd01583ce3635620f7a7d65c89a083c2ba61ce3eb65a4d0e5', '2026-04-14 14:50:15', '2026-04-07 17:50:15'),
+(74, 1, '52f2219d132f8669dc97c2f907def928effa45661d04abd696500d1e6727a005', '2026-04-14 15:06:17', '2026-04-07 18:06:17'),
+(75, 1, '654c724092b441b7c3404f3b1758ec31eda04edcd279c82d991efc24ba1b5d74', '2026-04-14 15:35:46', '2026-04-07 18:35:46'),
+(76, 1, 'e970f9b1e006b68d79a019b0a94d26212bcf0296a0a8d738208a065751ae2a19', '2026-04-14 15:52:39', '2026-04-07 18:52:39'),
+(77, 1, '359af3a81407aa5a1f931991f229ada0a23475d2060f2fa3559f9c0664e10942', '2026-04-14 16:11:20', '2026-04-07 19:11:20'),
+(78, 1, 'd4d0279554b5fdf6dccc127126c61b5966a1a3e882ad5731b6ded3151cfadd4c', '2026-04-14 16:27:13', '2026-04-07 19:27:13'),
+(79, 1, 'd4f9b8368740e60504aaf5c3c5d02d16432634ddf1aa45d065780cf160538155', '2026-04-14 16:43:50', '2026-04-07 19:43:50'),
+(80, 1, '43a2c2bdb10f0c800af75d268097e14b9812eca15e61b4c22b48b20beb88cf3b', '2026-04-14 17:02:08', '2026-04-07 20:02:08'),
+(81, 1, 'a48bd6929eee7ada09de26a509a1863be7326add1e32260fdc442eea54d47d1f', '2026-04-14 17:24:53', '2026-04-07 20:24:53'),
+(82, 1, 'f3461e6eb15f6abf737b479cb65e8af771391aa8caa329a168fefd8b1e50ed1c', '2026-04-14 17:53:33', '2026-04-07 20:53:33'),
+(83, 1, 'f6646d41263845ea6fab8e1a93f0d03cc2a757e285c28e41e8a5709fcbc5d5de', '2026-04-14 18:19:59', '2026-04-07 21:19:59');
 
 -- --------------------------------------------------------
 
@@ -392,12 +481,23 @@ CREATE TABLE `user_house_assignments` (
 INSERT INTO `user_house_assignments` (`id`, `employee_id`, `house_id`, `assigned_at`) VALUES
 (6, 2, 'house1a', '2026-04-06 20:06:48'),
 (7, 2, 'house1b', '2026-04-06 20:06:48'),
-(9, 3, 'house2a', '2026-04-06 20:30:27'),
-(10, 3, 'house2c', '2026-04-06 20:30:27');
+(11, 3, 'house2a', '2026-04-06 22:13:50');
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `crate_inventory`
+--
+ALTER TABLE `crate_inventory`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `crate_movements`
+--
+ALTER TABLE `crate_movements`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `customers`
@@ -490,6 +590,18 @@ ALTER TABLE `user_house_assignments`
 --
 
 --
+-- AUTO_INCREMENT for table `crate_inventory`
+--
+ALTER TABLE `crate_inventory`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `crate_movements`
+--
+ALTER TABLE `crate_movements`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT for table `customers`
 --
 ALTER TABLE `customers`
@@ -523,13 +635,13 @@ ALTER TABLE `mortality`
 -- AUTO_INCREMENT for table `payments`
 --
 ALTER TABLE `payments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `production`
 --
 ALTER TABLE `production`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `purchases`
@@ -541,13 +653,13 @@ ALTER TABLE `purchases`
 -- AUTO_INCREMENT for table `refresh_tokens`
 --
 ALTER TABLE `refresh_tokens`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=84;
 
 --
 -- AUTO_INCREMENT for table `user_house_assignments`
 --
 ALTER TABLE `user_house_assignments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- Constraints for dumped tables

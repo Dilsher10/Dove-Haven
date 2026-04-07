@@ -8,7 +8,7 @@ let inventory = [];
 let customers = [];
 let orders = [];
 let employees = [];
-let crateStock = 150;
+let crateStock = [];
 let crateMovements = [];
 let excessData = [];
 let growthData = [];
@@ -22,7 +22,7 @@ let mortalityChartInstance = null;
 let layingChartInstance = null;
 let housesData = [];
 let userHouseAssignments = [];
-const EGGS_PER_CRATE = 30;
+let systemSettings = { eggsPerCrate: 30, stockThreshold: 200 };
 
 function getAssignedHouses() {
     if (currentUser && currentUser.role === 'farm_manager') {
@@ -44,6 +44,7 @@ async function initializeDemoData() {
         inventory = data.inventory || [];
         customers = data.customers || [];
         orders = data.orders || [];
+        crateStock = data.crateStock || 0;
         crateMovements = data.crateMovements || [];
         inventoryTransactions = data.inventoryTransactions || [];
         growthData = data.growthData || [];
@@ -51,6 +52,9 @@ async function initializeDemoData() {
         purchases = data.purchases || [];
         housesData = data.houses || [];
         userHouseAssignments = data.user_house_assignments || [];
+        if (data.settings) {
+            systemSettings = data.settings;
+        }
         if (!currentUser && data.currentUser) {
             currentUser = data.currentUser;
         }
@@ -289,6 +293,39 @@ function showRecentCollections() {
 }
 
 
+// Show House Status
+function showHouseStatus() {
+    const table = document.getElementById('houseStatus');
+    if (table) {
+        table.innerHTML = '';
+
+        housesData.forEach(p => {
+            const row = document.createElement('tr');
+            row.className = 'bg-white border-b hover:bg-gray-50 transition duration-200';
+
+            if (p.status.toLowerCase() === 'active') {
+                statusColor = 'bg-green-100 text-green-700';
+            } else {
+                statusColor = 'bg-gray-200 text-yellow-700';
+            } 
+
+            row.innerHTML = `
+                <td class="py-4 font-medium text-gray-800">
+                    ${p.name}
+                </td>
+                <td class="py-4 px-4">
+                    <span class="px-3 py-1 rounded-full text-sm font-semibold ${statusColor}">
+                        ${p.status}
+                    </span>
+                </td>
+            `;
+
+            table.appendChild(row);
+        });
+    }
+}
+
+
 
 function showHouseDetail(houseId) {
     const section = document.getElementById('houseDetailSection');
@@ -362,21 +399,24 @@ function showHouseDetail(houseId) {
 
 // Dashboard Functions
 function loadDashboard() {
-    const today = new Date().toLocaleDateString('en-CA');
+    const today = new Date().toISOString().split('T')[0];
+    const todayData = (productionData || []).filter(p => p.date === today);
+    const totalEggs = todayData.reduce(
+        (sum, p) => sum + Number(p.total_eggs || 0),
+        0
+    );
 
-    const todayData = productionData.filter(p => p.date === today);
-    const totalEggs = todayData.reduce((sum, p) => sum + (p.totalEggs || 0), 0);
-
-    const todaySales = orders
+    const todaySales = (orders || [])
         .filter(o => o.date === today)
-        .reduce((sum, o) => sum + (o.paid || 0), 0);
+        .reduce((sum, o) => sum + Number(o.paid || 0), 0);
 
     updateElement('todayEggs', totalEggs.toLocaleString());
-    updateElement('todayCrates', crateStock);
-    updateElement('todaySales', `GH₵${todaySales.toFixed(0)}`);
+    updateElement('todayCrates', Number(crateStock || 0));
+    updateElement('todaySales', `GH₵${todaySales.toLocaleString()}`);
 
     initCharts();
     showRecentCollections();
+    showHouseStatus();
 }
 
 function updateElement(id, value) {
@@ -391,7 +431,7 @@ function initCharts() {
     if (ctx1) {
         const dates = [...new Set(productionData.map(p => p.date))];
         const dailyTotals = dates.map(date => {
-            return productionData.filter(p => p.date === date).reduce((sum, p) => sum + p.totalEggs, 0);
+            return productionData.filter(p => p.date === date).reduce((sum, p) => sum + p.total_eggs, 0);
         });
 
         productionChartInstance = new Chart(ctx1, {
@@ -608,7 +648,8 @@ function loadInventory() {
 
     if (alerts) {
         alerts.innerHTML = '';
-        const lowStock = inventory.filter(item => (item.quantity / item.purchased) < 0.2);
+        const threshold = Number(systemSettings.stockThreshold) || 500;
+        const lowStock = inventory.filter(item => item.quantity < threshold);
         if (lowStock.length > 0) {
             lowStock.forEach(item => {
                 const alert = document.createElement('div');
@@ -1004,8 +1045,8 @@ function calculateGradesTotal() {
     const broken = parseInt(document.getElementById('brokenEggsInput')?.value) || 0;
 
     const total = large + medium + small + pullet + broken;
-    const crates = Math.floor(total / EGGS_PER_CRATE);
-    const loose = total % EGGS_PER_CRATE;
+    const crates = Math.floor(total / Number(systemSettings.eggsPerCrate));
+    const loose = total % Number(systemSettings.eggsPerCrate);
 
     const totalDisplay = document.getElementById('totalEggDisplay');
     const crateInput = document.getElementById('crateInput');
@@ -1024,7 +1065,7 @@ function calculateFromCrates() {
 
     const crates = parseInt(crateInput?.value) || 0;
     const loose = parseInt(looseInput?.value) || 0;
-    const total = (crates * EGGS_PER_CRATE) + loose;
+    const total = (crates * Number(systemSettings.eggsPerCrate)) + loose;
 
     if (totalDisplay) totalDisplay.value = total;
 }
@@ -1037,7 +1078,7 @@ function calculateFromLoose() {
 
     const crates = parseInt(crateInput?.value) || 0;
     const loose = parseInt(looseInput?.value) || 0;
-    const total = (crates * EGGS_PER_CRATE) + loose;
+    const total = (crates * Number(systemSettings.eggsPerCrate)) + loose;
 
     if (totalDisplay) totalDisplay.value = total;
 }
@@ -1046,9 +1087,46 @@ function calculateFromLoose() {
 function loadCrates() {
     const availableEl = document.getElementById('availableCrates');
     const soldEl = document.getElementById('soldCratesToday');
+    const damagedEl = document.getElementById('damagedCrates');
+    const movementTable = document.getElementById('crateMovementTable');
 
     if (availableEl) availableEl.textContent = crateStock;
-    if (soldEl) soldEl.textContent = 0;
+
+    // Calculate sold today
+    const today = new Date().toISOString().split('T')[0];
+    const soldToday = orders
+        .filter(o => o.date === today)
+        .reduce((sum, o) => sum + (parseInt(o.quantity) || 0), 0);
+    if (soldEl) soldEl.textContent = soldToday;
+
+    // Calculate damaged/lost total from movements
+    const damagedTotal = Math.abs(crateMovements
+        .filter(m => m.type === 'Damage/Loss')
+        .reduce((sum, m) => sum + (parseInt(m.quantity) || 0), 0));
+    if (damagedEl) damagedEl.textContent = damagedTotal;
+
+    // Populate movements table
+    if (movementTable) {
+        movementTable.innerHTML = '';
+        crateMovements.forEach(m => {
+            const row = document.createElement('tr');
+            row.className = 'bg-white border-b hover:bg-gray-50';
+            row.innerHTML = `
+                <td class="px-4 py-3">${m.date}</td>
+                <td class="px-4 py-3">
+                    <span class="px-2 py-1 rounded-full text-xs ${m.quantity > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                        ${m.type}
+                    </span>
+                </td>
+                <td class="px-4 py-3 font-semibold ${m.quantity > 0 ? 'text-green-600' : 'text-red-600'}">
+                    ${m.quantity > 0 ? '+' : ''}${m.quantity}
+                </td>
+                <td class="px-4 py-3 text-gray-600">${m.reason || m.source || '-'}</td>
+                <td class="px-4 py-3 font-bold">${m.balance}</td>
+            `;
+            movementTable.appendChild(row);
+        });
+    }
 }
 
 function openCrateAdjustmentModal() {
@@ -1058,25 +1136,88 @@ function openCrateAdjustmentModal() {
 // CRM Functions
 function loadCRM() {
     const totalOutstanding = orders.reduce((sum, o) => sum + (parseFloat(o.balance) || 0), 0);
-
     const today = new Date().toISOString().split('T')[0];
     const todayOrders = orders.filter(o => o.date === today);
 
     const cashSales = todayOrders
-        .filter(o => o.paymentMethod === 'cash')
+        .filter(o => o.payment_method === 'cash')
         .reduce((sum, o) => sum + (parseFloat(o.paid) || 0), 0);
 
     const bankSales = todayOrders
-        .filter(o => o.paymentMethod === 'bank')
+        .filter(o => o.payment_method === 'bank')
         .reduce((sum, o) => sum + (parseFloat(o.paid) || 0), 0);
+    
+    const pendingBalance = todayOrders.reduce((sum, o) => sum + (parseFloat(o.balance) || 0), 0);
 
     const outstandingEl = document.getElementById('totalOutstanding');
     const cashEl = document.getElementById('cashSales');
     const bankEl = document.getElementById('bankSales');
+    const pendingBalanceEl = document.getElementById('pendingBalance');
 
     if (outstandingEl) outstandingEl.textContent = 'GH₵' + totalOutstanding.toFixed(2);
     if (cashEl) cashEl.textContent = 'GH₵' + cashSales.toFixed(2);
     if (bankEl) bankEl.textContent = 'GH₵' + bankSales.toFixed(2);
+    if (pendingBalanceEl) pendingBalanceEl.textContent = 'GH₵' + pendingBalance.toFixed(2);
+
+    // Dynamic Top Cards Calculation
+    const todayProduction = (productionData || []).filter(p => p.date === today);
+    const todayCrates = todayProduction.reduce((sum, p) => sum + (parseInt(p.crates) || 0), 0);
+    const todayLoose = todayProduction.reduce((sum, p) => sum + (parseInt(p.loose_eggs) || 0), 0);
+
+    const totalEggsProduced = productionData.reduce((sum, p) => sum + (parseInt(p.total_eggs) || 0), 0);
+    const totalCratesSold = orders.reduce((sum, o) => sum + (parseInt(o.quantity) || 0), 0);
+    const totalEggsSold = totalCratesSold * Number(systemSettings.eggsPerCrate);
+
+    const availableEggsTotal = Math.max(0, totalEggsProduced - totalEggsSold);
+    const stockCrates = Math.floor(availableEggsTotal / Number(systemSettings.eggsPerCrate));
+    const stockLoose = availableEggsTotal % Number(systemSettings.eggsPerCrate);
+
+    updateElement('salesTotalCrates', todayCrates.toLocaleString());
+    updateElement('salesTotalLoose', todayLoose.toLocaleString());
+    updateElement('salesTotalExcess', stockLoose.toLocaleString());
+    updateElement('salesCratesStock', stockCrates.toLocaleString());
+    updateElement('salesTotalEggs', availableEggsTotal.toLocaleString());
+
+    // Egg Grades Stock Breakdown
+    const gradeStockContainer = document.getElementById('eggGradesStock');
+    if (gradeStockContainer) {
+        gradeStockContainer.innerHTML = '';
+        const grades = [
+            { id: 'large', name: 'Large', color: 'text-green-600' },
+            { id: 'medium', name: 'Medium', color: 'text-blue-600' },
+            { id: 'small', name: 'Small', color: 'text-orange-600' },
+            { id: 'pullet', name: 'Pullet', color: 'text-purple-600' },
+            { id: 'broken', name: 'Broken', color: 'text-red-600' }
+        ];
+
+        grades.forEach(grade => {
+            const produced = productionData.reduce((sum, p) => sum + (parseInt(p.grades?.[grade.id] || 0)), 0);
+            
+            // Heuristic for sold by grade: search in order items string
+            let soldCrates = 0;
+            orders.forEach(o => {
+                const items = o.items || '';
+                const regex = new RegExp(`(\\d+)\\s+Crates\\s+${grade.name}\\s+Eggs`, 'i');
+                const match = items.match(regex);
+                if (match) soldCrates += parseInt(match[1]);
+            });
+
+            // Broken eggs are not typically sold in orders
+            const soldEggs = grade.id === 'broken' ? 0 : (soldCrates * Number(systemSettings.eggsPerCrate));
+            const available = Math.max(0, produced - soldEggs);
+            const availableCrates = Math.floor(available / Number(systemSettings.eggsPerCrate));
+            const availableLoose = available % Number(systemSettings.eggsPerCrate);
+
+            const div = document.createElement('div');
+            div.className = 'bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col items-center justify-center text-center';
+            div.innerHTML = `
+                <p class="text-xs text-gray-500 uppercase font-bold mb-1">${grade.name}</p>
+                <p class="text-xl font-extrabold ${grade.color}">${available.toLocaleString()}</p>
+                <p class="text-[10px] text-gray-400 mt-1">${availableCrates} Crates, ${availableLoose} Loose</p>
+            `;
+            gradeStockContainer.appendChild(div);
+        });
+    }
 
     // CUSTOMERS TABLE
     const customersBody = document.getElementById('customersTableBody');
@@ -1227,11 +1368,15 @@ function openPaymentModal(orderId) {
     const order = orders.find(o => o.id === orderId);
     if (!order) return;
 
+    const form = document.getElementById('paymentForm');
+    if (form) form.reset();
+
     const orderIdInput = document.getElementById('paymentOrderId');
     const balanceDisplay = document.getElementById('currentBalanceDisplay');
 
     if (orderIdInput) orderIdInput.value = orderId;
-    if (balanceDisplay) balanceDisplay.value = 'GH₵' + order.balance.toFixed(2);
+    if (balanceDisplay) balanceDisplay.value = 'GH₵' + Number(order.balance).toFixed(2);
+
     openModal('paymentModal');
 }
 
@@ -1246,7 +1391,9 @@ function loadPurchasesTable() {
 
     tbody.innerHTML = '';
 
-    purchases.forEach(p => {
+    const sortedPurchases = [...purchases].sort((a, b) => Number(b.id) - Number(a.id));
+
+    sortedPurchases.forEach(p => {
         const row = document.createElement('tr');
         row.className = 'bg-white border-b hover:bg-gray-50';
 
@@ -1262,9 +1409,9 @@ function loadPurchasesTable() {
             <td class="px-4 py-3 font-semibold">GH₵${totalCost.toFixed(2)}</td>
             <td class="px-4 py-3">${p.supplier || ''}</td>
             <td class="px-4 py-3">
-                ${p.invoiceFile
+                ${p.invoice
                 ? `<button onclick="viewInvoice('${p.id}')" class="text-blue-600 hover:text-blue-800 text-sm" title="View Invoice">
-                        <i data-lucide="file-text" class="w-4 h-4 inline"></i> ${p.invoiceFile}
+                        <i data-lucide="file-text" class="w-4 h-4 inline"></i> ${p.invoice}
                     </button>`
                 : '<span class="text-gray-400 text-sm">No invoice</span>'
             }
@@ -1280,26 +1427,9 @@ function loadPurchasesTable() {
 function viewInvoice(purchaseId) {
     const purchase = purchases.find(p => p.id == purchaseId);
 
-    if (purchase && purchase.invoiceData) {
-        const win = window.open('', '_blank');
-        if (!win) return;
-
-        if (purchase.invoiceData.startsWith('data:application/pdf')) {
-            win.document.write(`
-                <iframe src="${purchase.invoiceData}" 
-                    style="width:100%;height:100%;border:none"></iframe>
-            `);
-        } else {
-            win.document.write(`
-                <html>
-                    <body style="margin:0;display:flex;justify-content:center;align-items:center;background:#f0f0f0">
-                        <img src="${purchase.invoiceData}" style="max-width:100%;max-height:100vh">
-                    </body>
-                </html>
-            `);
-        }
-
-        win.document.close();
+    if (purchase && purchase.invoice) {
+        const fileUrl = `./uploads/${purchase.invoice}`;
+        window.open(fileUrl, '_blank');
     } else {
         showAlert('Invoice file not available', 'warning');
     }
@@ -1379,7 +1509,7 @@ th{border-bottom:1px solid #000}
 <p class="total">Total: GH₵${total.toFixed(2)}</p>
 <p><strong>Paid:</strong> GH₵${paid.toFixed(2)}</p>
 <p><strong>Balance:</strong> GH₵${balance.toFixed(2)}</p>
-<p><strong>Payment:</strong> ${order.paymentMethod || ''}</p>
+<p><strong>Payment:</strong> ${order.payment_method || ''}</p>
 <hr>
 <p style="text-align:center">Thank you for your business!</p>
 <p style="text-align:center;color:#666">Dove Haven Farms</p>
@@ -1476,19 +1606,75 @@ function loadAdmin() {
     `;
         houseAssignBody.appendChild(row);
     });
+
+    // Populate Settings
+    const eggsInput = document.getElementById('eggsPerCrate');
+    const thresholdInput = document.getElementById('stockThreshold');
+    if (eggsInput) eggsInput.value = systemSettings.eggsPerCrate || 30;
+    if (thresholdInput) thresholdInput.value = systemSettings.stockThreshold || 500;
+}
+
+async function saveSystemSettings() {
+    const eggsPerCrate = document.getElementById('eggsPerCrate').value;
+    const stockThreshold = document.getElementById('stockThreshold').value;
+
+    const formData = new FormData();
+    formData.append('eggsPerCrate', eggsPerCrate);
+    formData.append('stockThreshold', stockThreshold);
+
+    try {
+        const response = await fetch('./api/update_settings.php', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+            },
+            body: formData
+        });
+        const result = await response.json();
+        if (result.success) {
+            showAlert('Settings updated successfully!', 'success');
+            systemSettings.eggsPerCrate = eggsPerCrate;
+            systemSettings.stockThreshold = stockThreshold;
+        } else {
+            showAlert(result.error || 'Failed to update settings', 'error');
+        }
+    } catch (error) {
+        console.error("Error updating settings:", error);
+        showAlert('Server connection error.', 'error');
+    }
 }
 
 function openEmployeeModal() {
     openModal('employeeModal');
 }
 
-function toggleEmployeeStatus(id) {
+async function toggleEmployeeStatus(id) {
     const emp = employees.find(e => e.id === String(id));
-
     if (emp) {
-        emp.status = emp.status === 'active' ? 'inactive' : 'active';
-        loadAdmin();
-        showAlert(`Employee ${emp.status === 'active' ? 'activated' : 'deactivated'}`, 'success');
+        const newStatus = emp.status === 'active' ? 'inactive' : 'active';
+        try {
+            const res = await fetch('./api/update_employee_status.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: id,
+                    status: newStatus
+                })
+            });
+            const data = await res.json();
+            if (data.message === "Status updated successfully") {
+                emp.status = newStatus;
+                loadAdmin();
+                showAlert(`Employee ${newStatus === 'active' ? 'activated' : 'deactivated'}`, 'success');
+            } else {
+                showAlert(data.message, 'error');
+            }
+
+        } catch (error) {
+            showAlert('Server error', 'error');
+        }
     }
 }
 
@@ -1513,8 +1699,8 @@ function initFormHandlers() {
             const pullet = parseInt(formData.get('pulletEggs')) || 0;
             const broken = parseInt(formData.get('brokenEggs')) || 0;
             const totalEggs = large + medium + small + pullet + broken;
-            const crates = Math.floor(totalEggs / 30);
-            const loose = totalEggs % 30;
+            const crates = Math.floor(totalEggs / Number(systemSettings.eggsPerCrate));
+            const loose = totalEggs % Number(systemSettings.eggsPerCrate);
 
             const newEntry = {
                 id: Date.now(),
@@ -1658,20 +1844,10 @@ function initFormHandlers() {
                 total: total,
                 paid: paid,
                 balance: total - paid,
-                paymentMethod: formData.get('paymentMethod'),
+                payment_method: formData.get('payment_method'),
                 paymentStatus: paid >= total ? 'paid' : (paid > 0 ? 'partial' : 'pending')
             };
 
-            if (totalCrates > 0) {
-                crateStock -= totalCrates;
-                crateMovements.unshift({
-                    date: new Date().toLocaleString(),
-                    type: 'Sale',
-                    quantity: -totalCrates,
-                    source: customers.find(c => c.id === customerId)?.name || 'Unknown',
-                    balance: crateStock
-                });
-            }
 
             const customer = customers.find(c => c.id === customerId);
             if (customer) {
@@ -1718,6 +1894,9 @@ function initFormHandlers() {
         });
     }
 
+
+
+
     // Payment Form
     const paymentForm = document.getElementById('paymentForm');
     if (paymentForm) {
@@ -1732,7 +1911,7 @@ function initFormHandlers() {
             };
 
             try {
-                const res = await fetchWithAuth('./api/add_payment.php', {
+                const res = await fetchWithAuth('./api/record_payment.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
@@ -1968,22 +2147,10 @@ function initFormHandlers() {
             e.preventDefault();
             const formData = new FormData(e.target);
 
-            const newPurchase = {
-                date: formData.get('purchaseDate'),
-                category: formData.get('purchaseCategory'),
-                item: formData.get('purchaseItem'),
-                quantity: parseFloat(formData.get('purchaseQty')) || 0,
-                unit: formData.get('purchaseUnit'),
-                unitCost: parseFloat(formData.get('unitCost')) || 0,
-                totalCost: parseFloat(formData.get('totalCost')) || 0,
-                supplier: formData.get('purchaseSupplier')
-            };
-
             try {
                 const res = await fetchWithAuth('./api/add_purchase.php', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newPurchase)
+                    body: formData
                 });
                 const result = await res.json();
                 if (result.success) {
@@ -2002,31 +2169,42 @@ function initFormHandlers() {
         });
     }
 
+
     // Crate Adjustment Form
     const crateForm = document.getElementById('crateAdjustmentForm');
     if (crateForm) {
-        crateForm.addEventListener('submit', function (e) {
+        crateForm.addEventListener('submit', async function (e) {
             e.preventDefault();
             const formData = new FormData(e.target);
-            const type = formData.get('adjustmentType');
-            const qty = parseInt(formData.get('crateQty')) || 0;
-            const actualQty = type === 'add' ? qty : -qty;
+            const data = {
+                adjustmentType: formData.get('adjustmentType'),
+                crateQty: formData.get('crateQty'),
+                reason: formData.get('reason')
+            };
 
-            crateStock += actualQty;
-            crateMovements.unshift({
-                date: new Date().toLocaleString(),
-                type: type === 'add' ? 'Purchase/Return' : (type === 'remove' ? 'Damage/Loss' : 'Correction'),
-                quantity: actualQty,
-                source: formData.get('reason'),
-                balance: crateStock
-            });
-
-            closeModal('crateAdjustmentModal');
-            e.target.reset();
-            loadCrates();
-            showAlert('Crate stock adjusted!', 'success');
+            try {
+                const res = await fetchWithAuth('./api/adjust_crates.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                if (result.success) {
+                    await initializeDemoData();
+                    closeModal('crateAdjustmentModal');
+                    e.target.reset();
+                    loadCrates();
+                    showAlert('Crate stock adjusted successfully!', 'success');
+                } else {
+                    showAlert('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error("Backend Error:", error);
+                showAlert("Server connection failed.", "error");
+            }
         });
     }
+
 
     // Excess Form
     const excessForm = document.getElementById('excessForm');

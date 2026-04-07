@@ -20,6 +20,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data['feed'], $data['feedType'], $data['comments'], $employeeId
         );
         $stmt->execute();
+        
+        // Update Crate Stock
+        if ($data['crates'] > 0) {
+            $qty = (int)$data['crates'];
+            $conn->query("UPDATE crate_inventory SET stock = stock + $qty");
+            
+            $stockRes = $conn->query("SELECT stock FROM crate_inventory LIMIT 1");
+            $newStock = $stockRes->fetch_assoc()['stock'];
+            
+            $houseId = $data['houseId'];
+            
+            $stmt2 = $conn->prepare("INSERT INTO crate_movements (type, quantity, reason, balance) VALUES ('Production', ?, ?, ?)");
+            $reason = "Collection from " . strtoupper($houseId);
+            $stmt2->bind_param("isi", $qty, $reason, $newStock);
+            $stmt2->execute();
+        }
         echo json_encode(['success' => true]);
     } catch (\mysqli_sql_exception $e) {
         echo json_encode(['success' => false, 'error' => $e->getMessage()]);

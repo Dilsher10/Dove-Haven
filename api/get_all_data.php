@@ -32,6 +32,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $response['payments'] = $conn->query("SELECT * FROM payments")->fetch_all(MYSQLI_ASSOC);
         $response['houses'] = $conn->query("SELECT * FROM houses")->fetch_all(MYSQLI_ASSOC);
         $response['user_house_assignments'] = $conn->query("SELECT * FROM user_house_assignments")->fetch_all(MYSQLI_ASSOC);
+        
+        $stock_res = $conn->query("SELECT stock FROM crate_inventory LIMIT 1")->fetch_assoc();
+        $response['crateStock'] = $stock_res ? $stock_res['stock'] : 0;
+        $response['crateMovements'] = $conn->query("SELECT * FROM crate_movements ORDER BY date DESC")->fetch_all(MYSQLI_ASSOC);
+
+        // Ensure settings table exists and fetch them
+        $conn->query("CREATE TABLE IF NOT EXISTS system_settings (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            setting_key VARCHAR(100) UNIQUE NOT NULL,
+            setting_value VARCHAR(255) NOT NULL
+        )");
+
+        // Check if default settings exist, if not insert them
+        $defaults = [
+            'eggsPerCrate' => '30',
+            'stockThreshold' => '500'
+        ];
+        foreach ($defaults as $key => $val) {
+            $conn->query("INSERT IGNORE INTO system_settings (setting_key, setting_value) VALUES ('$key', '$val')");
+        }
+
+        $settings_res = $conn->query("SELECT setting_key, setting_value FROM system_settings")->fetch_all(MYSQLI_ASSOC);
+        $settings = [];
+        foreach ($settings_res as $row) {
+            $settings[$row['setting_key']] = $row['setting_value'];
+        }
+        $response['settings'] = $settings;
 
         $user_res = $conn->query("SELECT id, name, role FROM employees WHERE id = $user_id")->fetch_assoc();
         $response['currentUser'] = $user_res;

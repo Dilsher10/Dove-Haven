@@ -40,7 +40,9 @@ include './includes/header.php';
                         </div>
                         <span class="text-sm text-green-600 font-medium" id="eggTrend">+12%</span>
                     </div>
-                    <p class="text-2xl font-bold text-gray-900" id="todayEggs">0</p>
+                    <p class="text-2xl font-bold text-gray-900" id="todayEggs">
+                        <!-- Populated by JS -->
+                    </p>
                     <p class="text-sm text-gray-600">Eggs Today</p>
                 </div>
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">

@@ -115,17 +115,24 @@ include './includes/header.php';
 
              <!-- System Settings -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h3 class="text-lg font-semibold mb-4">System Settings</h3>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">System Settings</h3>
+                    <button onclick="saveSystemSettings()"
+                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2">
+                        <i data-lucide="save" class="w-4 h-4"></i>
+                        Save Settings
+                    </button>
+                </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Eggs per Crate (Standard)</label>
-                        <input type="number" id="eggsPerCrate" value="30"
+                        <input type="number" id="eggsPerCrate" placeholder="30"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Low Feed Alert Threshold
                             (kg)</label>
-                        <input type="number" id="stockThreshold" value="500"
+                        <input type="number" id="stockThreshold" placeholder="500"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none">
                     </div>
                 </div>

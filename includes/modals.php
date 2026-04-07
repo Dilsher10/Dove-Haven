@@ -335,7 +335,7 @@
                 <div class="grid grid-cols-2 gap-4 mb-4">
                     <div>
                         <label class="block text-xs text-gray-600 mb-1">Payment Method</label>
-                        <select name="paymentMethod" id="orderPaymentMethod" required
+                        <select name="payment_method" id="orderPaymentMethod" required
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none">
                             <option value="cash">Cash</option>
                             <option value="bank">Bank Deposit</option>
@@ -943,3 +943,46 @@
         </form>
     </div>
 </div>
+
+
+
+
+
+<!-- Payment Modal (for existing orders) -->
+    <div id="paymentModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md">
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-semibold">Record Payment</h3>
+                <button onclick="closeModal('paymentModal')" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <form id="paymentForm" class="p-6 space-y-4">
+                <input type="hidden" name="orderId" id="paymentOrderId">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Current Balance</label>
+                    <input type="text" id="currentBalanceDisplay" readonly class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-red-50 text-red-600 font-semibold">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
+                    <select name="paymentMethod" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none">
+                        <option value="cash">Cash</option>
+                        <option value="bank">Bank Deposit</option>
+                        <option value="mobile">Mobile Money</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Amount Paid (GH₵)</label>
+                    <input type="number" name="paymentAmount" required min="0.01" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Reference/Notes</label>
+                    <input type="text" name="paymentRef" placeholder="Receipt number, bank ref, etc." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none">
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" onclick="closeModal('paymentModal')" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">Record Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
