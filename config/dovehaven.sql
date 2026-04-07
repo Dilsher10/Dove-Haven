@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 07, 2026 at 06:31 PM
+-- Generation Time: Apr 07, 2026 at 08:25 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -117,11 +117,11 @@ CREATE TABLE `employees` (
 --
 
 INSERT INTO `employees` (`id`, `name`, `username`, `password`, `role`, `email`, `status`, `last_login`, `failed_attempts`, `lock_until`) VALUES
-(1, 'Administrator', 'admin', '$2y$12$WsICFROoteOg/BiaNvb1MOqKVlveD6rLqjp.R6tr3Qr1dIComOdbS', 'admin', 'admin@dovehaven.com', 'active', '2026-04-07 21:19:59', 0, NULL),
+(1, 'Administrator', 'admin', '$2y$12$WsICFROoteOg/BiaNvb1MOqKVlveD6rLqjp.R6tr3Qr1dIComOdbS', 'admin', 'admin@dovehaven.com', 'active', '2026-04-07 23:17:31', 0, NULL),
 (2, 'Farm Manager 1', 'manager1', '$2y$12$GhOtqLjRwI2XXL5sePoL/uf15XUKFteuvKLXSMRA3mmaqcISC9WtO', 'farm_manager', 'manager1@dovehaven.com', 'active', '2026-04-06 21:57:58', 0, NULL),
 (3, 'Farm Manager 2', 'manager2', '$2y$12$Wm.qIxbkn84arCFyQzsp4uTqaZFNnzKCjyJKrV0N/UFBPNw3MGyIy', 'farm_manager', 'manager2@dovehaven.com', 'active', '2026-04-06 23:55:33', 0, NULL),
 (4, 'Supervisor', 'supervisor', '$2y$12$DsvCAtcvf3ulUJs7W.tcv.B/TrRgIad4sl3WU/AAke.xSB5uBV.AK', 'supervisor', 'supervisor@dovehaven.com', 'active', '2026-04-07 16:31:00', 0, NULL),
-(5, 'Sales Manager', 'sales', '$2y$12$azk20ztho7uxVoirPv1WCu/iieH/3bA7CFc95i9.Df4cL4ql/uSWy', 'sales_manager', 'sales@dovehaven.com', 'active', '2026-04-06 22:13:19', 0, NULL);
+(5, 'Sales Manager', 'sales', '$2y$12$azk20ztho7uxVoirPv1WCu/iieH/3bA7CFc95i9.Df4cL4ql/uSWy', 'sales_manager', 'dilsher@codeanddesigngroup.com', 'active', '2026-04-07 23:15:04', 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -197,7 +197,7 @@ CREATE TABLE `inventory` (
 --
 
 INSERT INTO `inventory` (`id`, `name`, `quantity`, `purchased`, `used`, `supplier`, `cost`) VALUES
-('corn', 'Corn/Maize', 2502.00, 5028.00, 2521.00, 'GrainCo Ltd', 0.35),
+('corn', 'Corn/Maize', 502.00, 5028.00, 4521.00, 'GrainCo Ltd', 0.35),
 ('dcp', 'DCP', 200.00, 500.00, 300.00, 'MineralSupply', 0.65),
 ('developer', 'Developer Feed', 600.00, 1200.00, 600.00, 'In-House', 0.50),
 ('fishmeal', 'Fish Meal', 400.00, 800.00, 400.00, 'SeaFeed Co', 0.85),
@@ -251,7 +251,8 @@ INSERT INTO `inventory_transactions` (`id`, `date`, `ingredient`, `type`, `quant
 (13, '2026-04-03', 'corn', 'purchase', 6.00, '', 'Purchased from ddddd', '2026-04-02 19:55:41'),
 (14, '2026-04-03', 'corn', 'purchase', 5.00, '', 'Purchased from Uzair', '2026-04-03 12:50:19'),
 (15, '2026-04-03', 'corn', 'purchase', 1.00, '', 'Purchased from John', '2026-04-03 14:08:54'),
-(16, '2026-04-03', 'corn', 'purchase', 1.00, '', 'Purchased from John', '2026-04-03 15:31:28');
+(16, '2026-04-03', 'corn', 'purchase', 1.00, '', 'Purchased from John', '2026-04-03 15:31:28'),
+(17, '2026-04-07', 'corn', 'usage', 2000.00, 'new', 'adada', '2026-04-07 17:39:06');
 
 -- --------------------------------------------------------
 
@@ -306,6 +307,31 @@ INSERT INTO `orders` (`id`, `customer_id`, `date`, `items`, `quantity`, `product
 ('ORD-003', 1, '2026-04-07', '10 Crates Large Eggs, 10 Crates Medium Eggs, 10 Crates Small Eggs, 10 Crates Extra Small Eggs, 10 x Large Eggs (Tray)', 40, 'various', 1170.00, 1170.00, 0.00, 'cash', 'paid'),
 ('ORD-004', 2, '2026-04-07', '30 Crates Large Eggs, 10 Crates Medium Eggs, 10 Crates Small Eggs, 10 x Small Eggs (Tray)', 50, 'various', 1530.00, 1530.00, 0.00, 'cash', 'paid'),
 ('ORD-005', 2, '2026-04-07', '10 Crates Large Eggs, 10 Crates Medium Eggs, 10 Crates Small Eggs, 10 Crates Extra Small Eggs, 10 x Live Bird', 40, 'various', 1200.00, 1200.00, 0.00, 'cash', 'paid');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `password_resets`
+--
+
+CREATE TABLE `password_resets` (
+  `id` int(11) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `password_resets`
+--
+
+INSERT INTO `password_resets` (`id`, `email`, `token`, `expires_at`, `created_at`) VALUES
+(1, 'dilsher@codeanddesigngroup.com', 'ff43e50dde5c55deb3977e0d2d926265e52d1945f9b2a587fa3556cd73534394', '2026-04-07 21:08:05', '2026-04-07 18:08:05'),
+(2, 'dilsher@codeanddesigngroup.com', '99516d6a079c4ce2b784fa3e5afeb2dd44b0616a70a795ce71fc1803e771e0e3', '2026-04-07 21:09:53', '2026-04-07 18:09:53'),
+(3, 'dilsher@codeanddesigngroup.com', '3e12d34bc17984d9a66614be94e1da8201a8716e5fbdb2045fa56612cb1dfab0', '2026-04-07 21:11:03', '2026-04-07 18:11:03'),
+(4, 'dilsher@codeanddesigngroup.com', '2734e4f5c9b3cc7deff5b5927e858833332462ba66dbb473d32260f802146a25', '2026-04-07 21:12:52', '2026-04-07 18:12:52'),
+(5, 'dilsher@codeanddesigngroup.com', '83af58572b87891ce22f4957cc399a3d54c2320f2a391457d6f92be2768ff5dc', '2026-04-07 21:13:32', '2026-04-07 18:13:32');
 
 -- --------------------------------------------------------
 
@@ -399,7 +425,9 @@ INSERT INTO `purchases` (`id`, `date`, `category`, `item`, `quantity`, `unit`, `
 (5, '2026-03-31', 'feed', 'hhh', 1.00, 'kg', 0.01, 0.01, 'dil', ''),
 (6, '2026-03-31', 'feed', 'new', 1.00, 'units', 0.01, 0.01, 'dil', ''),
 (7, '2026-03-31', 'Feed Ingredient', 'wheat', 4.40, 'kg', 0.25, 0.25, 'John', ''),
-(8, '2026-04-01', 'Feed Ingredient', 'corn', 5.00, 'kg', 1.00, 1.00, 'John', '');
+(8, '2026-04-01', 'Feed Ingredient', 'corn', 5.00, 'kg', 1.00, 1.00, 'John', ''),
+(9, '2026-04-07', 'feed', 'ddddd', 11.00, 'units', 1.00, 1.00, 'dddddddddd', 'Logo English.jpeg'),
+(10, '2026-04-07', 'feed', 'hhhsdasd', 34.00, 'units', 1.00, 1.00, 'sadfsdf', 'logo-white.png');
 
 -- --------------------------------------------------------
 
@@ -459,7 +487,32 @@ INSERT INTO `refresh_tokens` (`id`, `user_id`, `token`, `expires_at`, `created_a
 (80, 1, '43a2c2bdb10f0c800af75d268097e14b9812eca15e61b4c22b48b20beb88cf3b', '2026-04-14 17:02:08', '2026-04-07 20:02:08'),
 (81, 1, 'a48bd6929eee7ada09de26a509a1863be7326add1e32260fdc442eea54d47d1f', '2026-04-14 17:24:53', '2026-04-07 20:24:53'),
 (82, 1, 'f3461e6eb15f6abf737b479cb65e8af771391aa8caa329a168fefd8b1e50ed1c', '2026-04-14 17:53:33', '2026-04-07 20:53:33'),
-(83, 1, 'f6646d41263845ea6fab8e1a93f0d03cc2a757e285c28e41e8a5709fcbc5d5de', '2026-04-14 18:19:59', '2026-04-07 21:19:59');
+(83, 1, 'f6646d41263845ea6fab8e1a93f0d03cc2a757e285c28e41e8a5709fcbc5d5de', '2026-04-14 18:19:59', '2026-04-07 21:19:59'),
+(84, 1, 'a6deecb67485ff103ad6e5c580700e3a7ac8058513bfe0062a34a6c6e42b3596', '2026-04-14 18:38:34', '2026-04-07 21:38:34'),
+(85, 1, '647765800e240edbeca31a4e2d3b163a2696063ab2566670d81d1e92045f2b29', '2026-04-14 18:53:56', '2026-04-07 21:53:56'),
+(86, 1, '587f34cae1d5fbc3c752ee80260c766a15d6d3dec992b9956bbf4d5fd65ae01d', '2026-04-14 19:09:02', '2026-04-07 22:09:02'),
+(87, 1, '79c67e128ced5408640200dd8d5b9e8efddd40a6fe27799cf31238fef69e361d', '2026-04-14 19:24:20', '2026-04-07 22:24:20'),
+(90, 1, 'fec3dd89efb68bc1b22f75c38b344b02130ed7b42e23e825da9708261c672b79', '2026-04-14 20:17:31', '2026-04-07 23:17:31');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `system_settings`
+--
+
+CREATE TABLE `system_settings` (
+  `id` int(11) NOT NULL,
+  `setting_key` varchar(100) NOT NULL,
+  `setting_value` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `system_settings`
+--
+
+INSERT INTO `system_settings` (`id`, `setting_key`, `setting_value`) VALUES
+(1, 'eggsPerCrate', '30'),
+(2, 'stockThreshold', '494');
 
 -- --------------------------------------------------------
 
@@ -551,6 +604,12 @@ ALTER TABLE `orders`
   ADD KEY `customer_id` (`customer_id`);
 
 --
+-- Indexes for table `password_resets`
+--
+ALTER TABLE `password_resets`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `payments`
 --
 ALTER TABLE `payments`
@@ -576,6 +635,13 @@ ALTER TABLE `purchases`
 ALTER TABLE `refresh_tokens`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `token` (`token`);
+
+--
+-- Indexes for table `system_settings`
+--
+ALTER TABLE `system_settings`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `setting_key` (`setting_key`);
 
 --
 -- Indexes for table `user_house_assignments`
@@ -623,13 +689,19 @@ ALTER TABLE `growth`
 -- AUTO_INCREMENT for table `inventory_transactions`
 --
 ALTER TABLE `inventory_transactions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `mortality`
 --
 ALTER TABLE `mortality`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `password_resets`
+--
+ALTER TABLE `password_resets`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `payments`
@@ -647,13 +719,19 @@ ALTER TABLE `production`
 -- AUTO_INCREMENT for table `purchases`
 --
 ALTER TABLE `purchases`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `refresh_tokens`
 --
 ALTER TABLE `refresh_tokens`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=84;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=91;
+
+--
+-- AUTO_INCREMENT for table `system_settings`
+--
+ALTER TABLE `system_settings`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
 
 --
 -- AUTO_INCREMENT for table `user_house_assignments`
