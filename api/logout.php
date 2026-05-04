@@ -11,12 +11,12 @@ if (empty($refresh_token)) {
     exit;
 }
 
-// 1. Delete refresh token from DB
+// Delete refresh token from DB
 $stmt = $conn->prepare("DELETE FROM refresh_tokens WHERE token = ?");
 $stmt->bind_param("s", $refresh_token);
 $stmt->execute();
 
-// 2. Clear access_token cookie
+// Clear access_token cookie
 setcookie('access_token', '', [
     'expires' => time() - 3600,
     'path' => '/',

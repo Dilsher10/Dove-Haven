@@ -26,7 +26,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
-        // Start transaction
         $conn->begin_transaction();
 
         // Check current stock
@@ -44,7 +43,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception("Not enough stock available");
         }
 
-        // Insert transaction
         $stmt = $conn->prepare("
             INSERT INTO inventory_transactions 
             (date, ingredient, type, quantity, purpose, notes) 
@@ -62,11 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $updateStmt->bind_param("dds", $quantity, $quantity, $ingredient);
         $updateStmt->execute();
 
-        // Commit transaction
         $conn->commit();
-
         echo json_encode(['success' => true]);
-
     } catch (Exception $e) {
         $conn->rollback();
         echo json_encode([

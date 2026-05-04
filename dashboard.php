@@ -8,7 +8,6 @@ include './includes/header.php';
     <?php include './includes/sidebar.php'; ?>
 
     <main class="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-8">
-        <div id="alertsContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
         <!-- Dashboard Page -->
         <div id="page-dashboard" class="page-content space-y-6">
@@ -72,7 +71,7 @@ include './includes/header.php';
                         </div>
                         <span class="text-sm text-gray-600 font-medium">Active</span>
                     </div>
-                    <p class="text-2xl font-bold text-gray-900">3,450</p>
+                    <p class="text-2xl font-bold text-gray-900" id="totalBirds">0</p>
                     <p class="text-sm text-gray-600">Birds in Houses</p>
                 </div>
             </div>

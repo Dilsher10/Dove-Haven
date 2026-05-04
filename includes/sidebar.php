@@ -10,13 +10,13 @@ function has_access($page, $role) {
     if ($role === 'admin') return true;
     
     $permissions = [
-        'dashboard' => ['admin', 'farm_manager', 'supervisor', 'sales_manager'],
-        'rearing' => ['admin', 'farm_manager', 'supervisor'],
-        'inventory' => ['admin', 'farm_manager', 'supervisor'],
-        'crm' => ['admin', 'sales_manager'],
-        'crates' => ['admin', 'farm_manager', 'sales_manager'],
-        'reports' => ['admin', 'farm_manager', 'supervisor', 'sales_manager'],
-        'chicks' => ['admin'],
+        'dashboard' => ['admin', 'auditor', 'farm_manager', 'supervisor', 'sales_manager'],
+        'rearing' => ['admin', 'auditor', 'farm_manager', 'supervisor'],
+        'inventory' => ['admin', 'auditor', 'farm_manager', 'supervisor'],
+        'crm' => ['admin', 'auditor', 'sales_manager'],
+        'crates' => ['admin', 'auditor', 'farm_manager', 'sales_manager'],
+        'reports' => ['admin', 'auditor', 'farm_manager', 'supervisor', 'sales_manager'],
+        'chicks' => ['admin', 'auditor'],
         'admin' => ['admin']
     ];
     

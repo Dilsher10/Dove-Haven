@@ -7,8 +7,6 @@ require_once '../auth/role_middleware.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents("php://input"), true);
-    
-    // Admin or Farm Manager or Sales Manager
     $user_id = check_access(['Admin', 'Farm Manager', 'Sales Manager']);
 
     try {

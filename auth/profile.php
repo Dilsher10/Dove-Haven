@@ -3,9 +3,10 @@ header('Content-Type: application/json');
 require_once '../config/config.php';
 require_once '../auth/auth_middleware.php';
 
-$user_id = requireAuth(); // Verify JWT
+// Verify JWT
+$user_id = requireAuth(); 
 
-// Return employee data (exclude password)
+// Return employee data
 $stmt = $conn->prepare("SELECT id, name, username, role, email, status, last_login FROM employees WHERE id = ?");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();

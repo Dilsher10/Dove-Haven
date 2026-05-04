@@ -10,12 +10,10 @@ require_once '../auth/role_middleware.php';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents("php://input"), true);
     check_access(['Admin', 'Sales Manager'], null, 'write');
-
-    // Start transaction to ensure atomicity
     $conn->begin_transaction();
 
     try {
-        // 1. Get customer_id for this order
+        // Get customer_id for this order
         $idStmt = $conn->prepare("SELECT customer_id FROM orders WHERE id = ?");
         $idStmt->bind_param("s", $data['orderId']);
         $idStmt->execute();
@@ -28,12 +26,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         $customerId = $order['customer_id'];
 
-        // 2. Insert into payments table
+        // Insert into payments table
         $stmt = $conn->prepare("INSERT INTO payments (order_id, amount, payment_method, payment_ref) VALUES (?, ?, ?, ?)");
         $stmt->bind_param("sdss", $data['orderId'], $data['amount'], $data['paymentMethod'], $data['paymentRef']);
         $stmt->execute();
 
-        // 3. Update the specific order: increase paid, decrease balance, and update status
+        // Update the specific order
         $updateStmt = $conn->prepare("
             UPDATE orders 
             SET paid = paid + ?, 
@@ -41,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 payment_status = CASE WHEN balance - ? <= 0 THEN 'paid' ELSE 'partial' END 
             WHERE id = ?
         ");
-        // String ID, so use "s" as the last parameter type
+        
         $updateStmt->bind_param("ddds", $data['amount'], $data['amount'], $data['amount'], $data['orderId']);
         $updateStmt->execute();
 

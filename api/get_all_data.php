@@ -37,7 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $response['crateStock'] = $stock_res ? $stock_res['stock'] : 0;
         $response['crateMovements'] = $conn->query("SELECT * FROM crate_movements ORDER BY date DESC")->fetch_all(MYSQLI_ASSOC);
 
-        // Ensure settings table exists and fetch them
         $conn->query("CREATE TABLE IF NOT EXISTS system_settings (
             id INT AUTO_INCREMENT PRIMARY KEY,
             setting_key VARCHAR(100) UNIQUE NOT NULL,

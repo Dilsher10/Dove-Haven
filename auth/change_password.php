@@ -3,7 +3,8 @@ header('Content-Type: application/json');
 require_once '../config/config.php';
 require_once '../auth/auth_middleware.php';
 
-$user_id = requireAuth(); // Verify JWT
+// Verify JWT
+$user_id = requireAuth(); 
 
 $data = json_decode(file_get_contents("php://input"), true);
 $current_password = $data['current_password'] ?? '';
@@ -15,7 +16,7 @@ if (empty($current_password) || empty($new_password)) {
     exit;
 }
 
-// 1. Fetch current password hash
+// Fetch current password hash
 $stmt = $conn->prepare("SELECT password FROM employees WHERE id = ?");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
@@ -28,10 +29,10 @@ if (!$user || !password_verify($current_password, $user['password'])) {
     exit;
 }
 
-// 2. Hash new password (bcrypt, cost 12)
+// Hash new password
 $hashed_password = password_hash($new_password, PASSWORD_BCRYPT, ['cost' => 12]);
 
-// 3. Update database
+// Update database
 $update_stmt = $conn->prepare("UPDATE employees SET password = ? WHERE id = ?");
 $update_stmt->bind_param("si", $hashed_password, $user_id);
 $update_stmt->execute();

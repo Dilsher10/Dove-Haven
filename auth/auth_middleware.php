@@ -2,9 +2,7 @@
 require_once __DIR__ . '/jwt_helper.php';
 require_once __DIR__ . '/../config/config.php';
 
-/**
- * Validates user authentication for APIs (via Authorization header)
- */
+// Validates user authentication for APIs (via Authorization header)
 function requireAuth() {
     $headers = getallheaders();
     $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
@@ -24,21 +22,19 @@ function requireAuth() {
     exit;
 }
 
-/**
- * Validates user authentication for full page loads (via Cookie or header)
- */
+// Validates user authentication for full page loads
 function authenticate_user() {
     global $conn;
     $jwt = null;
 
-    // 1. Try to read from Authorization header
+    // Try to read from Authorization header
     $headers = getallheaders();
     $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
     if (preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
         $jwt = $matches[1];
     }
 
-    // 2. Try to read from Cookie (essential for SSR and page navigations)
+    // Try to read from Cookie
     if (!$jwt && isset($_COOKIE['access_token'])) {
         $jwt = $_COOKIE['access_token'];
     }
@@ -47,7 +43,7 @@ function authenticate_user() {
         handle_unauthorized();
     }
 
-    // 3. Verify JWT signature and expiry
+    // Verify JWT signature and expiry
     $decoded = JWTHelper::verify($jwt);
     if (!$decoded) {
         handle_unauthorized();
@@ -55,7 +51,7 @@ function authenticate_user() {
 
     $user_id = $decoded['user_id'];
 
-    // 4. Check if user exists in employees table
+    // Check if user exists in employees table
     $stmt = $conn->prepare("SELECT id FROM employees WHERE id = ? AND status = 'active'");
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
@@ -63,7 +59,7 @@ function authenticate_user() {
         handle_unauthorized();
     }
 
-    // 5. Deny access if refresh token was deleted (user logged out)
+    // Deny access if refresh token was deleted (user logged out)
     $token_stmt = $conn->prepare("SELECT id FROM refresh_tokens WHERE user_id = ?");
     $token_stmt->bind_param("i", $user_id);
     $token_stmt->execute();
@@ -75,7 +71,6 @@ function authenticate_user() {
 }
 
 function handle_unauthorized() {
-    // If it's an API request, return JSON. Else redirect to login.
     $is_api = strpos($_SERVER['REQUEST_URI'], '/api/') !== false || 
               (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
 
@@ -89,9 +84,7 @@ function handle_unauthorized() {
     exit;
 }
 
-/**
- * Returns true if the user is currently authenticated
- */
+// Returns true if the user is currently authenticated
 function is_logged_in() {
     global $conn;
     $jwt = $_COOKIE['access_token'] ?? null;
@@ -114,9 +107,7 @@ function is_logged_in() {
     return true;
 }
 
-/**
- * Get current user role and name safely
- */
+// Get current user role and name safely
 function get_current_user_info() {
     global $conn;
     $jwt = $_COOKIE['access_token'] ?? null;

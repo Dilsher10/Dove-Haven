@@ -1,6 +1,6 @@
 <?php
 class JWTHelper {
-    private static $secret = 'your_secret_key_change_this_123456'; // In a real app, use an environment variable
+    private static $secret = 'your_secret_key_change_this_123456';
 
     public static function generate($payload, $expiry_minutes = 15) {
         $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);

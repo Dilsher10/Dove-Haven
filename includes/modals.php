@@ -398,8 +398,8 @@
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input type="email" name="email" required
+                <label class="block text-sm font-medium text-gray-700 mb-1">Email (optional)</label>
+                <input type="email" name="email"
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none">
             </div>
             <div>
@@ -437,7 +437,7 @@
         </div>
         <form id="employeeForm" class="p-6 space-y-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
                 <input type="text" name="name" required
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none">
             </div>
@@ -447,34 +447,20 @@
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none">
             </div>
             <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <input type="text" name="password" required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none">
+            </div>
+            <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
                 <select name="role" required
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none">
-                    <option value="employee">Farm Worker</option>
-                    <option value="supervisor">House Supervisor</option>
-                    <option value="admin">Administrator</option>
+                    <option value="">select role</option>
+                    <option value="auditor">Auditor/Consultant</option>
+                    <option value="farm_manager">Farm Manager</option>
+                    <option value="supervisor">Supervisor</option>
+                    <option value="sales_manager">Sales Manager</option>
                 </select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Assigned Houses</label>
-                <div class="flex gap-2 flex-wrap">
-                    <label class="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg cursor-pointer">
-                        <input type="checkbox" name="houses" value="house1f" class="rounded text-green-600">
-                        <span class="text-sm">House 1-F</span>
-                    </label>
-                    <label class="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg cursor-pointer">
-                        <input type="checkbox" name="houses" value="house2j" class="rounded text-green-600">
-                        <span class="text-sm">House 2-J</span>
-                    </label>
-                    <label class="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg cursor-pointer">
-                        <input type="checkbox" name="houses" value="house3f" class="rounded text-green-600">
-                        <span class="text-sm">House 3-F</span>
-                    </label>
-                    <label class="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg cursor-pointer">
-                        <input type="checkbox" name="houses" value="house4j" class="rounded text-green-600">
-                        <span class="text-sm">House 4-J</span>
-                    </label>
-                </div>
             </div>
             <div class="flex justify-end gap-3 pt-4">
                 <button type="button" onclick="closeModal('employeeModal')"
@@ -492,7 +478,7 @@
 
 <!-- Growth Modal -->
 <div id="growthModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow-xl w-full max-w-md">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-lg">
         <div class="p-6 border-b border-gray-200 flex justify-between items-center">
             <h3 class="text-lg font-semibold">Record Flock Growth</h3>
             <button onclick="closeModal('growthModal')" class="text-gray-400 hover:text-gray-600">
@@ -500,6 +486,7 @@
             </button>
         </div>
         <form id="growthForm" class="p-6 space-y-4">
+            <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
                 <input type="date" name="growthDate" required
@@ -531,6 +518,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Age (weeks)</label>
                 <input type="number" name="flockAge" required min="0"
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
             </div>
 
             <!-- Water/Medication Tracking for Growth -->
@@ -919,24 +907,22 @@
 
 <!-- House Assignment Modal -->
 <div id="reassignHouseModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow-xl w-full max-w-md">
-        <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-4xl">
+        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
             <h3 class="text-lg font-semibold">Reassign Houses for <span id="reassignEmployeeName" class="text-green-600"></span></h3>
             <button onclick="closeModal('reassignHouseModal')" class="text-gray-400 hover:text-gray-600">
                 <i data-lucide="x" class="w-6 h-6"></i>
             </button>
         </div>
-        <form id="reassignHouseForm" class="p-6 space-y-4">
+        <form id="reassignHouseForm" class="px-6 space-y-4">
             <input type="hidden" name="employee_id" id="reassignEmployeeId">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Select Assigned Houses</label>
-                <div class="grid grid-cols-2 gap-2" id="reassignHouseCheckboxes">
+                <div class="grid grid-cols-6 gap-2" id="reassignHouseCheckboxes">
                     <!-- Populated dynamically via JS -->
                 </div>
             </div>
-            <div class="flex justify-end gap-3 pt-4">
-                <button type="button" onclick="closeModal('reassignHouseModal')"
-                    class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">Cancel</button>
+            <div class="flex justify-end gap-3 pb-3">
                 <button type="submit"
                     class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">Save Assignments</button>
             </div>
@@ -948,7 +934,7 @@
 
 
 
-<!-- Payment Modal (for existing orders) -->
+    <!-- Payment Modal (for existing orders) -->
     <div id="paymentModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-md">
             <div class="p-6 border-b border-gray-200 flex justify-between items-center">
@@ -986,3 +972,38 @@
             </form>
         </div>
     </div>
+    
+    
+    
+    <div id="roleModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md">
+        <div class="p-5 border-b flex justify-between items-center">
+            <h3 class="text-lg font-semibold">Change Employee Role</h3>
+             <button onclick="closeModal('roleModal')" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+             </button>
+        </div>
+        <form id="employeeRoleForm" class="p-5 space-y-4">
+            <input type="hidden" name="empId" id="roleEmployeeId">
+            <div>
+                <label class="block text-sm font-medium mb-1">Select Role</label>
+                <select name="empRole" id="roleSelect" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="auditor">Auditor/Consultant</option>
+                    <option value="farm_manager">Farm Manager</option>
+                    <option value="supervisor">Supervisor</option>
+                    <option value="sales_manager">Sales Manager</option>
+                </select>
+            </div>
+            <div class="flex justify-end gap-3 pt-3">
+                <button onclick="closeModal('roleModal')"
+                    class="px-4 py-2 border rounded-lg hover:bg-gray-100">
+                    Cancel
+                </button>
+                <button type="submit"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    Save
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

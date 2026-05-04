@@ -71,7 +71,6 @@ async function initializeDemoData() {
             mortalityData = mortalityData.filter(m => assignedHouseIds.includes(m.houseId));
         }
     } catch (e) {
-        console.error("Backend data fetch failed", e);
         showAlert("Cannot connect to database. Please check your PHP server.", "error");
     }
 }
@@ -114,6 +113,61 @@ function showAlert(message, type = 'success') {
 }
 
 
+function showDashboardAlert(message, type = 'success') {
+    const container = document.getElementById('alertDashboardLogin');
+    if (!container) return;
+
+    const alert = document.createElement('div');
+    const colors = {
+        success: 'bg-green-500',
+        error: 'bg-red-500',
+        warning: 'bg-yellow-500',
+        info: 'bg-blue-500'
+    };
+    const icons = {
+        success: 'check-circle',
+        error: 'alert-circle',
+        warning: 'alert-triangle',
+        info: 'info'
+    };
+
+    alert.className = `${colors[type]} text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 alert-enter`;
+    alert.innerHTML = `
+        <i data-lucide="${icons[type]}" class="w-5 h-5"></i>
+        <span>${message}</span>
+    `;
+    container.appendChild(alert);
+
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+
+    setTimeout(() => {
+        alert.classList.remove('alert-enter');
+        alert.classList.add('alert-exit');
+        setTimeout(() => alert.remove(), 300);
+    }, 3000);
+}
+
+
+function showPendingAlert(message, type = 'success') {
+    localStorage.setItem('pendingAlert', JSON.stringify({ message, type }));
+}
+
+function checkPendingAlert() {
+    const pending = localStorage.getItem('pendingAlert');
+    if (pending) {
+        try {
+            const { message, type } = JSON.parse(pending);
+            showDashboardAlert(message, type);
+        } catch (e) {
+            console.error("Error parsing pending alert", e);
+        }
+        localStorage.removeItem('pendingAlert');
+    }
+}
+
+
 // Authentication
 function initLogin() {
     const loginForm = document.getElementById('loginForm');
@@ -134,12 +188,12 @@ function initLogin() {
                     localStorage.setItem('access_token', result.access_token);
                     localStorage.setItem('refresh_token', result.refresh_token);
                     currentUser = result.user;
+                    showPendingAlert('Login successful! Welcome to Dove Haven Farms.', 'success');
                     await loginSuccess();
                 } else {
-                    showAlert(result.message || 'Invalid credentials.', 'error');
+                    showAlert(result.message, 'error');
                 }
             } catch (error) {
-                console.error("Backend login failed", error);
                 showAlert('Server connection error.', 'error');
             }
         });
@@ -162,10 +216,9 @@ function logout() {
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
             currentUser = null;
+            showPendingAlert('You have been successfully logged out.', 'info');
             window.location.href = 'login.php';
         });
-    } else {
-        window.location.href = 'login.php';
     }
 }
 
@@ -179,8 +232,6 @@ async function fetchWithAuth(url, options = {}) {
     }
 
     let response = await fetch(url, options);
-
-    // If unauthorized, attempt to refresh token
     if (response.status === 401) {
         const refreshToken = localStorage.getItem('refresh_token');
         if (refreshToken) {
@@ -299,7 +350,7 @@ function showHouseStatus() {
     if (table) {
         table.innerHTML = '';
 
-        housesData.forEach(p => {
+        housesData.slice(0, 5).forEach(p => {
             const row = document.createElement('tr');
             row.className = 'bg-white border-b hover:bg-gray-50 transition duration-200';
 
@@ -307,7 +358,7 @@ function showHouseStatus() {
                 statusColor = 'bg-green-100 text-green-700';
             } else {
                 statusColor = 'bg-gray-200 text-yellow-700';
-            } 
+            }
 
             row.innerHTML = `
                 <td class="py-4 font-medium text-gray-800">
@@ -405,6 +456,11 @@ function loadDashboard() {
         (sum, p) => sum + Number(p.total_eggs || 0),
         0
     );
+    
+    const totalBirds = growthData.reduce(
+        (sum, p) => sum + Number(p.bird_count || 0),
+        0
+    );
 
     const todaySales = (orders || [])
         .filter(o => o.date === today)
@@ -413,6 +469,7 @@ function loadDashboard() {
     updateElement('todayEggs', totalEggs.toLocaleString());
     updateElement('todayCrates', Number(crateStock || 0));
     updateElement('todaySales', `GH₵${todaySales.toLocaleString()}`);
+    updateElement('totalBirds', totalBirds.toLocaleString());
 
     initCharts();
     showRecentCollections();
@@ -716,39 +773,46 @@ function openIngredientUsageModal() {
 
 // Rearing Page
 function loadRearingPage() {
-    const grid = document.getElementById('houseUnitsGrid');
-    if (!grid) return;
+    const select = document.getElementById('houseUnitsSelect');
+    if (!select) return;
 
-    grid.innerHTML = '';
     const housesToDisplay = getAssignedHouses();
-    const houseUnits = housesToDisplay.map(h => h.id);
+    let houseUnits = housesToDisplay.map(h => h.id);
+
+    houseUnits.sort((a, b) => {
+        const matchA = a.match(/(\d+)([A-Z])/i);
+        const matchB = b.match(/(\d+)([A-Z])/i);
+
+        if (!matchA || !matchB) return a.localeCompare(b);
+
+        const numA = parseInt(matchA[1]);
+        const numB = parseInt(matchB[1]);
+
+        const letterA = matchA[2].toUpperCase();
+        const letterB = matchB[2].toUpperCase();
+
+        if (numA !== numB) {
+            return numA - numB; // sort by number
+        }
+
+        return letterA.localeCompare(letterB); // then by letter
+    });
 
     houseUnits.forEach(house => {
         const houseData = productionData.filter(p => p.house_id === house);
         const latestData = houseData[houseData.length - 1];
-        const div = document.createElement('div');
-        div.className = 'bg-white p-4 rounded-xl shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition';
-        div.onclick = () => showHouseDetail(house);
-        div.innerHTML = `
-            <div class="flex justify-between items-start mb-3">
-                <h3 class="font-bold text-lg text-gray-900">${house.toUpperCase()}</h3>
-                <span class="text-xs px-2 py-1 rounded-full ${latestData ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}">
-                    ${latestData ? 'Active' : 'No Data'}
-                </span>
-            </div>
-            <div class="space-y-2">
-                <div class="flex justify-between text-sm">
-                    <span class="text-gray-600">Latest Production:</span>
-                    <span class="font-semibold">${latestData ? latestData.total_eggs + ' eggs' : 'N/A'}</span>
-                </div>
-                <div class="flex justify-between text-sm">
-                    <span class="text-gray-600">Crates:</span>
-                    <span class="font-semibold text-green-600">${latestData ? latestData.crates : '0'}</span>
-                </div>
-            </div>
-        `;
-        grid.appendChild(div);
+
+        const option = document.createElement('option');
+        option.value = house;
+        option.textContent = house.toUpperCase();
+        select.appendChild(option);
     });
+
+    select.onchange = function () {
+        if (this.value) {
+            showHouseDetail(this.value);
+        }
+    };
 }
 
 
@@ -762,16 +826,15 @@ function showHouseDetail(houseId) {
 
     // Get data for this house
     const houseProduction = productionData.filter(p => p.house_id === houseId);
-    const houseGrowth = growthData.filter(g => g.houseId === houseId);
-    const houseMortality = mortalityData.filter(m => m.houseId === houseId);
+    const houseGrowth = growthData.filter(g => g.house_id === houseId);
+    const houseMortality = mortalityData.filter(m => m.house_id === houseId);
 
     // Populate summary cards
-    const latestGrowth = houseGrowth[houseGrowth.length - 1];
-    const totalBirds = latestGrowth ? latestGrowth.birdCount : 500;
-    const totalDeaths = houseMortality.reduce((sum, m) => sum + m.deaths, 0);
+    const totalBirds = houseGrowth.reduce((sum, b) => sum + Number(b.bird_count || 0), 0);
+    const totalDeaths = houseMortality.reduce((sum, m) => sum + Number(m.deaths || 0), 0);
     const mortalityRate = totalBirds > 0 ? ((totalDeaths / (totalBirds + totalDeaths)) * 100).toFixed(1) : '0.0';
-    const avgProduction = houseProduction.length > 0 ? Math.round(houseProduction.reduce((sum, p) => sum + p.totalEggs, 0) / houseProduction.length) : 0;
-    const avgFeed = houseProduction.length > 0 ? (houseProduction.reduce((sum, p) => sum + p.feed, 0) / houseProduction.reduce((sum, p) => sum + p.totalEggs, 0) || 0).toFixed(2) : '0.00';
+    const avgProduction = houseProduction.length > 0 ? Math.round(houseProduction.reduce((sum, p) => sum + p.total_eggs, 0) / houseProduction.length) : 0;
+    const avgFeed = houseProduction.length > 0 ? (houseProduction.reduce((sum, p) => sum + p.feed, 0) / houseProduction.reduce((sum, p) => sum + p.total_eggs, 0) || 0).toFixed(2) : '0.00';
 
     const totalBirdsEl = document.getElementById('flockTotalBirds');
     const mortalityRateEl = document.getElementById('flockMortalityRate');
@@ -797,8 +860,6 @@ function showHouseDetail(houseId) {
     const table = document.getElementById('houseProductionTable');
     if (table) {
         table.innerHTML = '';
-        // console.log(houseProduction);
-
         houseProduction.slice().reverse().forEach(p => {
             const row = document.createElement('tr');
             row.className = 'bg-white border-b hover:bg-gray-50';
@@ -834,8 +895,8 @@ function renderGrowthChart(data, houseId) {
     // Use real data or generate sample data
     let labels, weights;
     if (data.length > 0) {
-        labels = data.map(d => 'Week ' + d.flockAgeWeeks);
-        weights = data.map(d => d.avgWeight);
+        labels = data.map(d => 'Week ' + d.flock_age_weeks);
+        weights = data.map(d => d.avg_weight);
     } else {
         // Sample growth curve for layers
         labels = ['Week 4', 'Week 8', 'Week 12', 'Week 16', 'Week 20', 'Week 24', 'Week 28'];
@@ -916,7 +977,7 @@ function renderLayingChart(data, totalBirds) {
     let labels, henDay;
     if (data.length > 0 && totalBirds > 0) {
         labels = data.map(d => d.date);
-        henDay = data.map(d => ((d.totalEggs / totalBirds) * 100).toFixed(1));
+        henDay = data.map(d => ((d.total_eggs / totalBirds) * 100).toFixed(1));
     } else {
         // Sample laying performance
         const today = new Date();
@@ -957,7 +1018,7 @@ function renderBenchmark(data, totalBirds) {
     const section = document.getElementById('benchmarkSection');
     if (!section) return;
 
-    const avgEggs = data.length > 0 ? Math.round(data.reduce((s, p) => s + p.totalEggs, 0) / data.length) : 0;
+    const avgEggs = data.length > 0 ? Math.round(data.reduce((s, p) => s + p.total_eggs, 0) / data.length) : 0;
     const henDayPct = totalBirds > 0 && data.length > 0 ? ((avgEggs / totalBirds) * 100).toFixed(1) : 0;
     const targetHenDay = 80;
     const performancePct = Math.min(100, (henDayPct / targetHenDay * 100)).toFixed(0);
@@ -982,7 +1043,7 @@ function renderBenchmark(data, totalBirds) {
             <div>
                 <div class="flex justify-between text-sm mb-1">
                     <span class="text-gray-600">Feed Efficiency</span>
-                    <span class="font-semibold">${data.length > 0 ? (data.reduce((s, p) => s + p.feed, 0) / data.reduce((s, p) => s + p.totalEggs, 0) || 0).toFixed(3) : '0.000'} kg/egg</span>
+                    <span class="font-semibold">${data.length > 0 ? (data.reduce((s, p) => s + p.feed, 0) / data.reduce((s, p) => s + p.total_eggs, 0) || 0).toFixed(3) : '0.000'} kg/egg</span>
                 </div>
             </div>
             <p class="text-xs text-gray-500 mt-2">Benchmarks based on industry standards for layer operations.</p>
@@ -991,8 +1052,6 @@ function renderBenchmark(data, totalBirds) {
 }
 
 function openGrowthModal() {
-    console.log('Growth');
-
     const dateInput = document.querySelector('#growthForm [name="growthDate"]');
     if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
 
@@ -1146,7 +1205,7 @@ function loadCRM() {
     const bankSales = todayOrders
         .filter(o => o.payment_method === 'bank')
         .reduce((sum, o) => sum + (parseFloat(o.paid) || 0), 0);
-    
+
     const pendingBalance = todayOrders.reduce((sum, o) => sum + (parseFloat(o.balance) || 0), 0);
 
     const outstandingEl = document.getElementById('totalOutstanding');
@@ -1192,7 +1251,7 @@ function loadCRM() {
 
         grades.forEach(grade => {
             const produced = productionData.reduce((sum, p) => sum + (parseInt(p.grades?.[grade.id] || 0)), 0);
-            
+
             // Heuristic for sold by grade: search in order items string
             let soldCrates = 0;
             orders.forEach(o => {
@@ -1364,6 +1423,18 @@ function openOrderModal() {
     openModal('orderModal');
 }
 
+
+function openEmployeeRoleModal(id) {
+    const emp = employees.find(e => e.id == id);
+    if (!emp) return;
+
+    document.getElementById('roleEmployeeId').value = emp.id;
+    document.getElementById('roleSelect').value = emp.role;
+
+    document.getElementById('roleModal').classList.remove('hidden');
+}
+
+
 function openPaymentModal(orderId) {
     const order = orders.find(o => o.id === orderId);
     if (!order) return;
@@ -1397,8 +1468,8 @@ function loadPurchasesTable() {
         const row = document.createElement('tr');
         row.className = 'bg-white border-b hover:bg-gray-50';
 
-        const unitCost = parseFloat(p.unitCost) || 0;
-        const totalCost = parseFloat(p.totalCost) || 0;
+        const unitCost = parseFloat(p.unit_cost) || 0;
+        const totalCost = parseFloat(p.total_cost) || 0;
 
         row.innerHTML = `
             <td class="px-4 py-3">${p.date || ''}</td>
@@ -1547,6 +1618,8 @@ function loadAdmin() {
 
             if (emp.role === 'admin') {
                 accessLabel = 'Full Access';
+            } else if (emp.role === 'auditor') {
+                accessLabel = 'Full Access';
             } else if (emp.role === 'supervisor') {
                 accessLabel = 'All Houses - Read Only';
             } else if (emp.role === 'sales_manager') {
@@ -1561,16 +1634,24 @@ function loadAdmin() {
                 <td class="px-6 py-4 font-medium">${emp.name}</td>
                 <td class="px-6 py-4 capitalize">${emp.role}</td>
                 <td class="px-6 py-4">${accessLabel}</td>
-                <td class="px-6 py-4 text-sm">${emp.last_login}</td>
+                <td class="px-6 py-4 text-sm">${emp.last_login || 'Never'}</td>
                 <td class="px-6 py-4">
                     <span class="px-2 py-1 rounded-full text-xs ${emp.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
                         ${emp.status}
                     </span>
                 </td>
-                <td class="px-6 py-4">
+                <td class="px-4 py-4 flex justify-around">
+                    ${emp.role === 'admin' ? '' : `
                     <button onclick="toggleEmployeeStatus(${emp.id})" class="text-gray-600 hover:text-gray-800">
                         <i data-lucide="power" class="w-4 h-4"></i>
                     </button>
+                    <button onclick="openEmployeeRoleModal(${emp.id})" class="text-green-600 hover:text-gray-800">
+                        <i data-lucide="square-pen" class="w-4 h-4"></i>
+                    </button>
+                    <button onclick="deleteEmployee(${emp.id})" class="text-red-600 hover:text-gray-800">
+                        <i data-lucide="trash" class="w-4 h-4"></i>
+                    </button>
+                `}
                 </td>
             `;
             tbody.appendChild(row);
@@ -1678,6 +1759,36 @@ async function toggleEmployeeStatus(id) {
     }
 }
 
+
+ // Delete Employee
+async function deleteEmployee(id) {
+    if (!confirm('Are you sure you want to delete this employee?')) return;
+
+    try {
+        const res = await fetch(`./api/delete_employee.php?id=${id}`, {
+            method: 'DELETE'
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            // remove from local array (optional but faster UI)
+            employees = employees.filter(e => e.id != id);
+
+            loadAdmin();
+            showAlert('Employee deleted successfully', 'success');
+        } else {
+            showAlert(data.message || 'Delete failed', 'error');
+        }
+
+    } catch (err) {
+        console.error(err);
+        showAlert('Server error', 'error');
+    }
+}
+
+
+
 function openPurchaseModal() {
     const dateInput = document.querySelector('#purchaseForm [name="purchaseDate"]');
     if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
@@ -1782,7 +1893,6 @@ function initFormHandlers() {
                     showAlert('Error: ' + responseData.error, 'error');
                 }
             } catch (error) {
-                console.error("Backend Error:", error);
                 showAlert("Server connection failed.", "error");
             }
         });
@@ -1894,6 +2004,51 @@ function initFormHandlers() {
         });
     }
 
+
+
+// Employee Role Form
+    const employeeRoleForm = document.getElementById('employeeRoleForm');
+
+if (employeeRoleForm) {
+    employeeRoleForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const data = {
+            id: document.getElementById('roleEmployeeId').value,
+            role: document.getElementById('roleSelect').value
+        };
+
+        try {
+            const res = await fetchWithAuth('./api/update_employee_role.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await res.json();
+
+            if (result.success) {
+
+                // update local array
+                const emp = employees.find(e => e.id == data.id);
+                if (emp) emp.role = data.role;
+
+                await initializeDemoData();
+                closeModal('roleModal');
+                loadAdmin();
+
+                showAlert('Role updated successfully', 'success');
+
+            } else {
+                showAlert('Error: ' + result.message, 'error');
+            }
+
+        } catch (error) {
+            console.error(error);
+            showAlert("Server connection failed.", "error");
+        }
+    });
+}
 
 
 
@@ -2015,31 +2170,93 @@ function initFormHandlers() {
             }
         });
     }
+    
 
     // Employee Form
     const employeeForm = document.getElementById('employeeForm');
     if (employeeForm) {
-        employeeForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const selectedHouses = Array.from(document.querySelectorAll('#employeeForm [name="houses"]:checked')).map(cb => cb.value);
+        employeeForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
 
-            const newEmployee = {
-                id: Date.now(),
-                name: formData.get('name'),
-                email: formData.get('email'),
-                role: formData.get('role'),
-                accessLevel: selectedHouses.length > 0 ? selectedHouses.join(', ') : 'None',
-                lastLogin: 'Never',
-                status: 'active',
-                houses: selectedHouses
-            };
-            employees.push(newEmployee);
+    const formData = new FormData(e.target);
+
+    const newEmployee = {
+        name: formData.get('name'),
+        username: formData.get('name').toLowerCase().replace(/\s+/g, ''),
+        email: formData.get('email'),
+        password: formData.get('password'),
+        role: formData.get('role'),
+        last_login: null,
+        status: 'inactive',
+        failed_attempts: 0,
+        lock_until: null
+    };
+
+    try {
+        const res = await fetchWithAuth('./api/add_employee.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newEmployee)
+        });
+
+        const result = await res.json();
+
+        if (result.success) {
+            await initializeDemoData();
             closeModal('employeeModal');
             e.target.reset();
             loadAdmin();
             showAlert('Employee added successfully!', 'success');
+        } else {
+            showAlert('Error: ' + result.error, 'error');
+        }
+    } catch (error) {
+        showAlert("Server connection failed.", "error");
+    }
+     });
+    }
+    
+    
+    
+    // Signup Form
+    const signupForm = document.getElementById('signupForm');
+    if (signupForm) {
+        signupForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const formData = new FormData(e.target);
+
+    const newSignup = {
+        name: formData.get('name'),
+        username: formData.get('name').toLowerCase().replace(/\s+/g, ''),
+        email: formData.get('email'),
+        password: formData.get('password'),
+        role: formData.get('role'),
+        last_login: null,
+        status: 'inactive',
+        failed_attempts: 0,
+        lock_until: null
+    };
+
+    try {
+        const res = await fetch('./api/signup.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newSignup)
         });
+
+        const result = await res.json();
+
+        if (result.success) {
+            e.target.reset();
+            showAlert('Sign Up successfully!', 'success');
+        } else {
+            showAlert('Error: ' + result.error, 'error');
+        }
+    } catch (error) {
+        showAlert("Server connection failed.", "error");
+    }
+     });
     }
 
 
@@ -2096,7 +2313,6 @@ function initFormHandlers() {
 
     // Ingredient Usage Form
     const ingredientUsageForm = document.getElementById('ingredientUsageForm');
-
     if (ingredientUsageForm) {
         ingredientUsageForm.addEventListener('submit', async function (e) {
             e.preventDefault();
@@ -2199,7 +2415,6 @@ function initFormHandlers() {
                     showAlert('Error: ' + result.error, 'error');
                 }
             } catch (error) {
-                console.error("Backend Error:", error);
                 showAlert("Server connection failed.", "error");
             }
         });
@@ -2276,11 +2491,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const result = await response.json();
                 if (result.success) {
-                    showAlert('Houses assigned successfully', 'success');
-                    closeModal('reassignHouseModal');
                     await initializeDemoData();
-                    if (currentPage === 'admin') loadAdmin();
-                    location.reload();
+                    closeModal('reassignHouseModal');
+                    loadAdmin();
+                    showAlert('Houses assigned successfully', 'success');
                 } else {
                     showAlert('Error: ' + result.error, 'error');
                 }
@@ -2294,13 +2508,83 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+function handleForgotPassword() {
+    const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+    if (!forgotPasswordForm) return;
+    forgotPasswordForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const emailInput = document.getElementById('email');
+        const email = emailInput.value.trim();
+        if (!email) {
+            showAlert('Please enter your email address.', 'error');
+            return;
+        }
+        try {
+            const response = await fetch('./api/forgot_password.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email })
+            });
+            const result = await response.json();
+            if (result.success) {
+                showAlert('Reset link has been sent to your email.', 'success');
+                forgotPasswordForm.reset();
+            } else {
+                showAlert(result.message || 'Something went wrong.', 'error');
+            }
+
+        } catch (error) {
+            showAlert('Server connection error. Please try again.', 'error');
+        }
+    });
+}
+
+
+
+function handleResetPassword() {
+    const resetPasswordForm = document.getElementById('resetPasswordForm');
+    if (!resetPasswordForm) return;
+    resetPasswordForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const token = new URLSearchParams(window.location.search).get('token');
+        
+        try {
+            const response = await fetch(`./api/reset_password.php?token=${token}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password, confirmPassword })
+            });
+            const result = await response.json();
+            if (result.success) {
+                showAlert('Your password has been reset successfully', 'success');
+                resetPasswordForm.reset();
+                resetPasswordForm.style.display = "none";
+            } else {
+                showAlert(result.message || 'Something went wrong.', 'error');
+            }
+
+        } catch (error) {
+            showAlert('Server connection error. Please try again.', 'error');
+        }
+    });
+}
+
+
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async function () {
     const page = window.location.pathname.split('/').pop().replace('.php', '') || 'dashboard';
 
+    checkPendingAlert();
     initLogin();
     initFormHandlers();
+    handleForgotPassword();
+    handleResetPassword();
 
     // If we're on a page other than login, load the data and the page-specific UI
     if (page !== 'login') {
@@ -2336,10 +2620,25 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Toggle Password Visibility
     const togglePassword = document.getElementById('togglePassword');
     const passwordInput = document.getElementById('password');
+    
     if (togglePassword && passwordInput) {
         togglePassword.addEventListener('click', function () {
             const isPass = passwordInput.type === 'password';
             passwordInput.type = isPass ? 'text' : 'password';
+            this.innerHTML = `<i data-lucide="${isPass ? 'eye-off' : 'eye'}" class="w-5 h-5"></i>`;
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+    }
+    
+    const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+    const confirmPassword = document.getElementById('confirmPassword');
+    
+    if (toggleConfirmPassword && confirmPassword) {
+        toggleConfirmPassword.addEventListener('click', function () {
+            const isPass = confirmPassword.type === 'password';
+            confirmPassword.type = isPass ? 'text' : 'password';
             this.innerHTML = `<i data-lucide="${isPass ? 'eye-off' : 'eye'}" class="w-5 h-5"></i>`;
             if (typeof lucide !== 'undefined') {
                 lucide.createIcons();

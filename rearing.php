@@ -9,7 +9,6 @@ include './includes/header.php';
 
     <main class="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-8">
         <div id="alertsContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
-
         <!-- Rearing & Production Page -->
         <div id="page-rearing" class="page-content space-y-6">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -36,10 +35,14 @@ include './includes/header.php';
                 </div>
             </div>
 
-            <!-- House Units Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" id="houseUnitsGrid">
-            <!-- Populated by JS -->
-            </div>
+            <!-- House Units -->
+            <select id="houseUnitsSelect"
+            class="w-full p-3 bg-white border border-gray-300 rounded-xl shadow-sm 
+                   text-gray-800 text-sm 
+                   focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 
+                   hover:border-gray-400 transition">
+            <option value="" disabled selected>Select House</option>
+            </select>
 
             <!-- House Detail Section -->
             <div id="houseDetailSection"

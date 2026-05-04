@@ -7,12 +7,12 @@ $data = json_decode(file_get_contents("php://input"), true);
 $refresh_token = $data['refresh_token'] ?? '';
 
 if (empty($refresh_token)) {
-    http_response_code(400); // Bad Request
+    http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Refresh token required']);
     exit;
 }
 
-// 1. Check refresh token in database
+// Check refresh token in database
 $stmt = $conn->prepare("SELECT user_id, expires_at FROM refresh_tokens WHERE token = ?");
 $stmt->bind_param("s", $refresh_token);
 $stmt->execute();
@@ -27,7 +27,7 @@ if (!$tokenData || strtotime($tokenData['expires_at']) < time()) {
 
 $user_id = $tokenData['user_id'];
 
-// 2. Fetch user to include in new JWT payload
+// Fetch user to include in new JWT payload
 $user_stmt = $conn->prepare("SELECT id, email, role FROM employees WHERE id = ?");
 $user_stmt->bind_param("i", $user_id);
 $user_stmt->execute();
@@ -39,7 +39,7 @@ if (!$user) {
     exit;
 }
 
-// 3. Issue new access token
+// Issue new access token
 $payload = [
     'user_id' => $user['id'],
     'email' => $user['email'],

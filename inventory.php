@@ -9,7 +9,6 @@ include './includes/header.php';
 
     <main class="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-8">
         <div id="alertsContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
-
         <!-- Feed Stock Page -->
         <div id="page-inventory" class="page-content space-y-6">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">

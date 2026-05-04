@@ -8,7 +8,7 @@ include './includes/header.php';
     <?php include './includes/sidebar.php'; ?>
 
     <main class="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-8">
-        <div id="alertsContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
 
         <!-- Crate Inventory Page -->
         <div id="page-crates" class="page-content space-y-6">

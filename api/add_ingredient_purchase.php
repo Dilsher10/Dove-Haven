@@ -7,8 +7,6 @@ require_once '../config/config.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents("php://input"), true);
-    
-    // Ensure quantity is a float
     $data['purchaseQuantity'] = isset($data['purchaseQuantity']) ? floatval($data['purchaseQuantity']) : 0;
 
     if (!$data['purchaseIngredient'] || !$data['purchaseDate'] || $data['purchaseQuantity'] <= 0) {
@@ -17,10 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
-        // Start transaction
         $conn->begin_transaction();
-
-        // Insert transaction record
         $stmt = $conn->prepare("
             INSERT INTO inventory_transactions 
             (date, ingredient, type, quantity, purpose, notes) 

@@ -6,7 +6,6 @@ header('Access-Control-Allow-Headers: Content-Type');
 require_once '../config/config.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Check if it's a multipart/form-data request
     $isMultipart = !empty($_FILES) || (isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'multipart/form-data') !== false);
     
     if ($isMultipart) {
@@ -33,7 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $p1 = $data['purchaseDate'] ?? $data['date'] ?? '';
         $p2 = $data['purchaseCategory'] ?? $data['category'] ?? '';
         $p3 = $data['purchaseItem'] ?? $data['item'] ?? '';
-        // Handle potential string versions of numbers from FormData
         $p4 = floatval($data['purchaseQty'] ?? $data['quantity'] ?? 0);
         $p5 = $data['purchaseUnit'] ?? $data['unit'] ?? '';
         $p6 = floatval($data['unitCost'] ?? 0);
